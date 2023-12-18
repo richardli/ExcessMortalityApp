@@ -1,0 +1,17 @@
+Package: ExcessMortalityApp
+Type: Package
+Title: Calculate and visualize excess mortality
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Zehang R", family = "Li", email= "lizehang@gmail.com", role = c("cre","aut"))
+    )
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: The package contains a ShinyApp for easy computation and visualization of excess mortality.
+Depends: R (>= 3.5)
+Imports: dplyr, scales, shiny, ggplot2, plotly, DT, lubridate, stats
+Additional_repositories: https://inla.r-inla-download.org/R/testing/
+Suggests: INLA
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
