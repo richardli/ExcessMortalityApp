@@ -220,10 +220,7 @@ observeEvent(input$processMe, {
        }, error = function(warn){
           return(NULL)
         })
-  }, extensions = 'Buttons', 
-                options = list(dom = 'Bfrtip',
-                buttons = c('copy', 'csv', 'excel', 'pdf', 'print'), 
-                pageLength = 20))
+  })
 
 
   output$tableSummary <- renderTable(rv$cleanTab[[input$table_show_type]][[input$table_show_sex]][[input$table_show_age]], digits = 0, align = "c")
