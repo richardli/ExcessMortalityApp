@@ -210,7 +210,12 @@ observeEvent(input$processMe, {
             tab <- tab[with(tab, order(Year, Week)), ]
          }
          rownames(tab) <- NULL
-         tab <- tab %>% DT::datatable() %>% formatRound(columns = 3:7, digits = 0)
+         tab <- tab %>% 
+              DT::datatable(extensions = 'Buttons', 
+                    options = list(dom = 'Bfrtip',
+                    buttons = c('copy', 'csv', 'excel', 'pdf', 'print'), 
+                    pageLength = 20)) %>% 
+              formatRound(columns = 3:7, digits = 0)
          return(tab)
        }, error = function(warn){
           return(NULL)
