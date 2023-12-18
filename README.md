@@ -35,6 +35,8 @@ There are additional columns that can be included in the data. The column names 
 
 The App adds up all deaths within each month/week to produce the total deaths and total population at each time point. When both sex and age are specified, the App adds up all deaths within each age/sex to produce the marginal total deaths and total population by age and sex. 
 
+The variables corresponding to age, sex, and population need to be specified manually in the App. If the variables are named "sex", "age", and "population" already, the variables will be automatically picked up by the App. When left unspecified, the App will ignore the age/sex breakdown.
+
 
 # Version history
 
@@ -42,7 +44,5 @@ The App adds up all deaths within each month/week to produce the total deaths an
 This version replicates the calculator by [Vital Strategies](https://preventepidemics.org/covid19/resources/excess-mortality/).
 
 
-
-The variables corresponding to age, sex, and population need to be specified manually in the App. If the variables are named "sex", "age", and "population" already, the variables will be automatically picked up by the App. When left unspecified, the App will ignore the age/sex breakdown.
 
 
