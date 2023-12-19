@@ -1,5 +1,6 @@
 require("plotly")
 require("DT")
+require("ExcessMortalityApp")
 ui <- fluidPage(
 
   tags$head(
@@ -81,6 +82,7 @@ ui <- fluidPage(
     mainPanel(
       textOutput("csvCheck"),
       navbarPage(title = NULL,
+                 h4(textOutput("message_file_upload")),
                  tabPanel(title = "Excess Mortality",
                           fluidRow(
                             column(3, 

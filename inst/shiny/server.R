@@ -126,8 +126,6 @@ observeEvent(input$processMe, {
           colnames(morData)[colnames(morData) == "death"] <- "deaths"
        }
 
-       ## TODO: check column names and return warning message
-
        time_case <- input$month_or_week
        if(time_case == "Monthly"){
           T <- 12
@@ -136,6 +134,42 @@ observeEvent(input$processMe, {
           T <- 53
           colnames(morData)[colnames(morData) == "week"] <- "timeCol"
        }
+
+       if(!"timeCol" %in% colnames(morData)){
+         if(time_case == "Monthly"){
+              output$message_file_upload <- renderText("'month' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
+          }else{
+              output$message_file_upload <- renderText("'week' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
+          }
+          rv$processed <- FALSE
+          return(NULL)
+       }else{
+          output$message_file_upload <- NULL
+       }
+       if(length(is.na(as.numeric(morData$timeCol))) > 0){
+           output$message_file_upload <- renderText("Month or week in the input data include non-numerical values. Check your data file.")
+            return(NULL)
+       }else{
+          output$message_file_upload <- NULL
+       }
+       if(min(as.numeric(morData$timeCol), na.rm = TRUE) < 1){
+           output$message_file_upload <- renderText("Month or week in the input data do not start from 1. Check your data file.")
+            return(NULL)
+       }else{
+          output$message_file_upload <- NULL
+       }
+       if(max(as.numeric(morData$timeCol), na.rm = TRUE) > T){
+        if(time_case == "Monthly"){
+              output$message_file_upload <- renderText("More than 12 months are found in the input data. Check your data file or the time scale is selected correctly.")
+          }else{
+              output$message_file_upload <- renderText("More than 53 weeks are found in the input data. Check your data file or the time scale is selected correctly.")
+          }
+          return(NULL)
+       }else{
+          output$message_file_upload <- NULL
+       }
+    
+ 
        if(input$raw_data_population == "None (assumed no change)"){
         morData$popCol <- NA
        }else{
@@ -169,6 +203,8 @@ observeEvent(input$processMe, {
        rv[['cleanTab']] <- summary_table(time_case, T, years, morData)
        rv[['excess']] <- base_model(time_case, T, years, morData, "sexCol", "ageCol", "popCol", "timeCol", use.rate = FALSE)
        rv[["processed"]] <- TRUE
+
+
 }
 )
 
@@ -177,7 +213,7 @@ observeEvent(input$processMe, {
   output$baselinePlot <- renderPlotly({
      req(input$processMe) 
      tryCatch({
-       mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show)
+       if(rv$processed) mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show)
       }, error = function(warn){
         return(NULL)
       })
@@ -186,37 +222,38 @@ observeEvent(input$processMe, {
   output$baselineTab <- DT::renderDataTable({
      req(input$processMe) 
      tryCatch({
+       if(rv$processed){
+         tab <- rv$excess$excess[[input$baseline_show_sex]][[input$baseline_show_age]]
+          if(input$month_or_week == "Monthly"){
+              tab$Month <- tab$timeCol
+              timeLabel = "Month"
+           }else{
+              tab$Week <- tab$timeCol
+              timeLabel = "Week"
+           }
 
-       tab <- rv$excess$excess[[input$baseline_show_sex]][[input$baseline_show_age]]
-        if(input$month_or_week == "Monthly"){
-            tab$Month <- tab$timeCol
-            timeLabel = "Month"
-         }else{
-            tab$Week <- tab$timeCol
-            timeLabel = "Week"
+           tab <- tab[, c("year", timeLabel, "deaths", "excess", "se", "lower", "upper")]
+           colnames(tab)[1] <- "Year"
+           colnames(tab)[3] <- "Actual Deaths"
+           colnames(tab)[4] <- "Excess Deaths"
+           colnames(tab)[5] <- "Standard Error of Excess"
+           colnames(tab)[6] <- "Lower limit of Excess (95% CI)"
+           colnames(tab)[7] <- "Uower limit of Excess (95% CI)"
+           # tab <- round(tab, 0)
+           if(input$month_or_week == "Monthly"){
+              tab <- tab[with(tab, order(Year, Month)), ]
+           }else{
+              tab <- tab[with(tab, order(Year, Week)), ]
+           }
+           rownames(tab) <- NULL
+           tab <- tab %>% 
+                DT::datatable(extensions = 'Buttons', 
+                      options = list(dom = 'Bfrtip',
+                      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'), 
+                      pageLength = 20)) %>% 
+                formatRound(columns = 3:7, digits = 0)
+           return(tab)
          }
-
-         tab <- tab[, c("year", timeLabel, "deaths", "excess", "se", "lower", "upper")]
-         colnames(tab)[1] <- "Year"
-         colnames(tab)[3] <- "Actual Deaths"
-         colnames(tab)[4] <- "Excess Deaths"
-         colnames(tab)[5] <- "Standard Error of Excess"
-         colnames(tab)[6] <- "Lower limit of Excess (95% CI)"
-         colnames(tab)[7] <- "Uower limit of Excess (95% CI)"
-         # tab <- round(tab, 0)
-         if(input$month_or_week == "Monthly"){
-            tab <- tab[with(tab, order(Year, Month)), ]
-         }else{
-            tab <- tab[with(tab, order(Year, Week)), ]
-         }
-         rownames(tab) <- NULL
-         tab <- tab %>% 
-              DT::datatable(extensions = 'Buttons', 
-                    options = list(dom = 'Bfrtip',
-                    buttons = c('copy', 'csv', 'excel', 'pdf', 'print'), 
-                    pageLength = 20)) %>% 
-              formatRound(columns = 3:7, digits = 0)
-         return(tab)
        }, error = function(warn){
           return(NULL)
         })
