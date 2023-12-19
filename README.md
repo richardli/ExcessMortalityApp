@@ -2,7 +2,9 @@
 
 This is the Shiny Application for excess mortality calculation, developed by the [openVA team](https://openva.net), supported by Vital Strategies. 
 
-# Installation
+An online version of this calculator is at [https://zehangli.shinyapps.io/ExcessMortalityApp/](https://zehangli.shinyapps.io/ExcessMortalityApp/).
+
+# Local installation
 
 To run the App on a local computer, the statistical programming software **R** needs to be installed. To install _R_, visit [https://cran.r-project.org/](https://cran.r-project.org/).
 
