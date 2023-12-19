@@ -12,6 +12,7 @@
 #' 
 #' @import plotly  
 #' @import DT
+#' @importFrom shinyjs useShinyjs
 #' @importFrom stats sd aggregate qnorm as.formula
 #' @importFrom grDevices colorRampPalette 
 #' @importFrom lubridate ym  
