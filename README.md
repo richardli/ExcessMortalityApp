@@ -9,7 +9,7 @@ To run the App on a local computer, the statistical programming software **R** n
 To install and run the App in _R_, the following packages are needed and can be installed by running the following command in _R_:
 
 ```
-install.packages("devtools")
+install.packages("devtools", repos = "https://cran.r-project.org")
 ```
 
 The App can be installed in _R_ by running the following command
@@ -18,13 +18,13 @@ library(devtools)
 install_github("richardli/ExcessMortalityApp")
 ```
 
-The App can be launched by running the following command in `R`. 
+The previous steps only need to be run when installing the first time or when updating the sofater. Once installed, the App can be launched by running the following command in `R`. 
 ```
 library(ExcessMortalityApp)
 launchApp()
 ```
 
-The App will then open in the default browser.
+The App will then open in the default browser. 
 
 # Input data format
 
@@ -45,6 +45,9 @@ The App adds up all deaths within each month/week to produce the total deaths an
 
 The variables corresponding to age, sex, and population need to be specified manually in the App. If the variables are named "sex", "age", and "population" already, the variables will be automatically picked up by the App. When left unspecified, the App will ignore the age/sex breakdown.
 
+# Troubleshooting
+
+When errors occur, the most likely reason is because the input data are ill-formatted. The easiest approach to reset the app is by refreshing the page in the browser. Example input format are included in the links on the left navigation bar. 
 
 # Version history
 

@@ -28,8 +28,15 @@ ui <- fluidPage(
                 "Upload your own data here (CSV file)",
                 multiple = FALSE,
                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-      h5("Details about the input data format are summarized in ",  tags$a(href="www.rstudio.com", "this document.")),
-      h5("Example input data (monthly):"),
+      h5("Details about the input data format are summarized in ",  tags$a(href="https://github.com/richardli/ExcessMortalityApp/blob/main/README.md", "this document.")),
+      br(),
+      h4("Options"),
+      selectInput("raw_data_population", "Select Column specifying Population Counts:", choices=c()),
+      selectInput("raw_data_sex", "Select Column specifying Sex:", choices=c()),
+      selectInput("raw_data_age", "Select Column specifying Age:", choices=c()),
+      br(),
+      conditionalPanel("output.fileUploaded", actionButton("processMe", h4("Analyze my data!")), align = "center"),
+      h4("Example input data (monthly):"),
       # actionButton(
       #     "takeDataset1", "Use example dataset", class = "btn-block"
       # ),
@@ -50,7 +57,7 @@ ui <- fluidPage(
           "downloadDataset4", "Download monthly example dataset by sex and age"
       ),
       br(),
-      h5("Example input data (weekly):"),
+      h4("Example input data (weekly):"),
       downloadLink(
           "downloadDataset5", "Download weekly example dataset"
       ),
@@ -68,13 +75,7 @@ ui <- fluidPage(
       ),
       br(),      
       br(),
-      br(),
-      h4("Options"),
-      selectInput("raw_data_population", "Select Column specifying Population Counts:", choices=c()),
-      selectInput("raw_data_sex", "Select Column specifying Sex:", choices=c()),
-      selectInput("raw_data_age", "Select Column specifying Age:", choices=c()),
-      br(),
-      conditionalPanel("output.fileUploaded", actionButton("processMe", h4("Analyze my data!")), align = "center")
+      br()
     ),
     ## Outputs
     mainPanel(
