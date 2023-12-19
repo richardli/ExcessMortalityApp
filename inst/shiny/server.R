@@ -240,7 +240,7 @@ observeEvent(input$processMe, {
         ww <- ""
         xlab <- "Month"
     }
-    if(input$table_show_type == "Death Count"){
+    if(input$table_show_type == "Death Counts"){
       ylab <- "Death Count"
     }else{
       ylab <- "Death Rate"
