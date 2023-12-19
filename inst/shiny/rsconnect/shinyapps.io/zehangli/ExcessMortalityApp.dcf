@@ -5,6 +5,6 @@ account: zehangli
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10826844
-bundleId: 8066272
+bundleId: 8066311
 url: https://zehangli.shinyapps.io/ExcessMortalityApp/
 version: 1
