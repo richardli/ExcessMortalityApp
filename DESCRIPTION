@@ -7,8 +7,8 @@ Authors@R: c(
     )
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: The package contains a ShinyApp for easy computation and visualization of excess mortality.
-Depends: R (>= 3.5)
-Imports: dplyr, scales, shiny, ggplot2, plotly, DT, lubridate, stats
+Depends: R (>= 3.5), shiny, shinyjs
+Imports: dplyr, scales, ggplot2, plotly, DT, lubridate, stats
 Additional_repositories: https://inla.r-inla-download.org/R/testing/
 Suggests: INLA
 License: GPL (>= 2)
