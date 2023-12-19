@@ -146,7 +146,7 @@ observeEvent(input$processMe, {
        }else{
           output$message_file_upload <- NULL
        }
-       if(length(is.na(as.numeric(morData$timeCol))) > 0){
+       if(sum(is.na(as.numeric(morData$timeCol))) > 0){
            output$message_file_upload <- renderText("Month or week in the input data include non-numerical values. Check your data file.")
             return(NULL)
        }else{
