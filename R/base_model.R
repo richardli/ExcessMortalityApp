@@ -1,4 +1,4 @@
-#' Function to create baseline prediction and compute excess 
+#' Function to create baseline prediction and compute excess using simple average
 #' 
 #' @param time_case string indicating monthly or weekly input
 #' @param T number of time periods
@@ -12,6 +12,8 @@
 #' 
 #' @import plotly  
 #' @import DT
+#' @import shinyWidgets
+#' @import shinybusy
 #' @importFrom shinyjs useShinyjs
 #' @importFrom stats sd aggregate qnorm as.formula
 #' @importFrom grDevices colorRampPalette 
@@ -45,7 +47,7 @@ base_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, tim
 	years_obs <- sort(years[years < 2020])
 	years_pand <- sort(years[years >= 2020])
 
-	base_model_internal <- function(time_case, T, years, morData, grouping = NULL, use.rate){
+	base_model_internal <- function(time_case, T, morData, years_obs, grouping = NULL, use.rate){
 		if(is.null(grouping)){
 			f1 <- as.formula(paste0("deaths ~ year + ", timeCol))
 			f2 <- as.formula(paste0(popCol, " ~ year + ", timeCol))
@@ -66,13 +68,15 @@ base_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, tim
 		}else{
 			f3 <- as.formula(paste0("deaths ~ ", timeCol, " + ", ff))
 		}
-		dd.mean <- aggregate(f3, data = dd, FUN = mean)
+		dd.mean <- aggregate(f3, data = subset(dd, year %in% years_obs), FUN = mean)
 		colnames(dd.mean)[colnames(dd.mean) == "deaths"] <- "mean"
-		dd.sd <- aggregate(f3, data = dd, FUN = function(x){sd(x, na.rm = TRUE)/sqrt(sum(!is.na(x)))})
+		dd.sd <- aggregate(f3, data = subset(dd, year %in% years_obs), FUN = function(x){sd(x, na.rm = TRUE)/sqrt(sum(!is.na(x)))})
 		colnames(dd.sd)[colnames(dd.sd) == "deaths"] <- "se"
 		out <- dplyr::left_join(dd.mean, dd.sd)
 		out$lower <- out$mean + qnorm(0.025) * out$se
 		out$upper <- out$mean + qnorm(1 - 0.025) * out$se
+		out <- dplyr::left_join(dd, out)
+		out$timeCol <- out[, "timeCol"]
 		return(out)
 	}
 
@@ -107,15 +111,15 @@ base_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, tim
 	}
 
 	# Output: baseline, sd, CI by month/week
-	base.all <- base_model_internal(time_case, T, years, subset(morData, year %in% years_obs), grouping = NULL, use.rate = use.rate)
-	base.sex <- base_model_internal(time_case, T, years, subset(morData, year %in% years_obs), grouping = sexCol, use.rate = use.rate)
-	base.age <- base_model_internal(time_case, T, years, subset(morData, year %in% years_obs), grouping = ageCol, use.rate = use.rate)
-	base.sexage <- base_model_internal(time_case, T, years, subset(morData, year %in% years_obs), grouping = c(sexCol, ageCol), use.rate = use.rate)
+	base.all <- base_model_internal(time_case, T, morData, years_obs, grouping = NULL, use.rate = use.rate)
+	base.sex <- base_model_internal(time_case, T, morData, years_obs, grouping = sexCol, use.rate = use.rate)
+	base.age <- base_model_internal(time_case, T, morData, years_obs, grouping = ageCol, use.rate = use.rate)
+	base.sexage <- base_model_internal(time_case, T, morData, years_obs, grouping = c(sexCol, ageCol), use.rate = use.rate)
 
 	base.out <- NULL 
 	base.out[["All"]][["All"]] <- base.all
 	for(s in unique(morData[, sexCol])){
-		base.out[[s]][["All"]] <- base.sex[base.sex[, sexCol] == s, ]
+		base.out[[s]][["All"]] <- base.sex[base.sex[, sexCol] == s, ] 
 	}
 	for(a in unique(morData[, ageCol])){
 		base.out[["All"]][[a]] <- base.age[base.age[, ageCol] == a, ]

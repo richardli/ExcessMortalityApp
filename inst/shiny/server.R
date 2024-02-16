@@ -195,13 +195,27 @@ observeEvent(input$processMe, {
        updateSelectInput(session, "baseline_show_age", choices = c("All", unique(rv$cleanData$ageCol)))
        updateSelectInput(session, "table_show_sex", choices = c("All", unique(rv$cleanData$sexCol)))
        updateSelectInput(session, "table_show_age", choices = c("All", unique(rv$cleanData$ageCol)))
+       updateSelectInput(session, "compare_show", 
+            choices = c(
+                ifelse(is.null(unique(rv$cleanData$sexCol)), NULL, "by Sex"),
+                ifelse(is.null(unique(rv$cleanData$ageCol)), NULL, "by Age"),
+                ifelse(is.null(unique(rv$cleanData$sexCol)) || is.null(unique(rv$cleanData$sexCol)), NULL, "by Sex and Age")
+            )
+        )
 
        ## ---------------------------------------------------------------------------------- ##
        ##  Compute baseline and excess
        ## ---------------------------------------------------------------------------------- ##
 
        rv[['cleanTab']] <- summary_table(time_case, T, years, morData)
-       rv[['excess']] <- base_model(time_case, T, years, morData, "sexCol", "ageCol", "popCol", "timeCol", use.rate = FALSE)
+       if(input$which_model == "Simple Baseline"){
+         rv[['excess']] <- base_model(time_case, T, years, morData, "sexCol", "ageCol", "popCol", "timeCol", use.rate = FALSE)        
+       }else{
+
+        show_modal_spinner(text = "Fitting the Excess Mortality Model") # show the spinner
+        rv[['excess']] <- smooth_model(time_case = time_case, T = T, years = years, morData = morData, sexCol = "sexCol", ageCol = "ageCol", popCol = "popCol", timeCol = "timeCol", use.rate = TRUE)
+        remove_modal_spinner() # hide the spinner
+       }
        rv[["processed"]] <- TRUE
 
 
@@ -213,17 +227,26 @@ observeEvent(input$processMe, {
   output$baselinePlot <- renderPlotly({
      req(input$processMe) 
      tryCatch({
-       if(rv$processed) mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show)
+       if(rv$processed) ggplotly(mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show)) %>% layout(legend = list(orientation = "v", x = 0.02, y = 0.95))
       }, error = function(warn){
         return(NULL)
       })
   })
+
+  output$download_baseplot = downloadHandler(
+    filename = function() {
+      paste0(input$plot_show, "_", input$month_or_week, "_Sex_", input$baseline_show_sex, "_Age_", input$baseline_show_age, '.pdf')
+    }, 
+    content = function(file) {
+      ggsave(file, plot = mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show), width = 8, height = 5)
+    })
 
   output$baselineTab <- DT::renderDataTable({
      req(input$processMe) 
      tryCatch({
        if(rv$processed){
          tab <- rv$excess$excess[[input$baseline_show_sex]][[input$baseline_show_age]]
+         print(head(tab))
           if(input$month_or_week == "Monthly"){
               tab$Month <- tab$timeCol
               timeLabel = "Month"
@@ -232,13 +255,13 @@ observeEvent(input$processMe, {
               timeLabel = "Week"
            }
 
-           tab <- tab[, c("year", timeLabel, "deaths", "excess", "se", "lower", "upper")]
+           tab <- tab[, c("year", timeLabel, "deaths", "excess", "lower", "upper")]
            colnames(tab)[1] <- "Year"
            colnames(tab)[3] <- "Actual Deaths"
            colnames(tab)[4] <- "Excess Deaths"
-           colnames(tab)[5] <- "Standard Error of Excess"
-           colnames(tab)[6] <- "Lower limit of Excess (95% CI)"
-           colnames(tab)[7] <- "Uower limit of Excess (95% CI)"
+           # colnames(tab)[5] <- "Standard Error of Excess"
+           colnames(tab)[5] <- "Lower limit of Excess (95% CI)"
+           colnames(tab)[6] <- "Uower limit of Excess (95% CI)"
            # tab <- round(tab, 0)
            if(input$month_or_week == "Monthly"){
               tab <- tab[with(tab, order(Year, Month)), ]
@@ -246,12 +269,14 @@ observeEvent(input$processMe, {
               tab <- tab[with(tab, order(Year, Week)), ]
            }
            rownames(tab) <- NULL
+           print(head(tab))
            tab <- tab %>% 
-                DT::datatable(extensions = 'Buttons', 
+                DT::datatable(
+                      extensions = 'Buttons', 
                       options = list(dom = 'Bfrtip',
-                      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'), 
+                      buttons = c('copy', 'csv', 'excel', 'print'), 
                       pageLength = 20)) %>% 
-                formatRound(columns = 3:7, digits = 0)
+                formatRound(columns = 3:6, digits = 0) 
            return(tab)
          }
        }, error = function(warn){

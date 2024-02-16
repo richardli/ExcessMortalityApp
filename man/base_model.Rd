@@ -2,7 +2,7 @@
 % Please edit documentation in R/base_model.R
 \name{base_model}
 \alias{base_model}
-\title{Function to create baseline prediction and compute excess}
+\title{Function to create baseline prediction and compute excess using simple average}
 \usage{
 base_model(
   time_case,
@@ -39,7 +39,7 @@ base_model(
 a list of calculated excess mortality
 }
 \description{
-Function to create baseline prediction and compute excess
+Function to create baseline prediction and compute excess using simple average
 }
 \examples{
 data(SampleInput1)
