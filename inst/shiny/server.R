@@ -261,7 +261,7 @@ observeEvent(input$processMe, {
             }
             }
         }
-        gg %>% layout(height = 360 * ndim[1], width = 300 * ndim[2] + 100) 
+        gg %>% layout(height = 360 * ndim[1], width = 320 * ndim[2] + 200) 
       }
       }, error = function(warn){
         return(NULL)
