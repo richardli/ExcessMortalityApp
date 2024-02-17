@@ -85,8 +85,12 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 		
 		dd <- aggregate(f1, data = morData, FUN = sum) 
 		if(use.rate){
-			dd.pop <- aggregate(f2, data = morData, FUN = sum)
-			dd <- dplyr::left_join(dd, dd.pop)
+			if(sum(is.na(morData[, popCol])) > 0){
+				dd[, popCol] <- 1				
+			}else{
+				dd.pop <- aggregate(f2, data = morData, FUN = sum)
+				dd <- dplyr::left_join(dd, dd.pop)	
+			}
 		}
 		dd$yearID <- dd$year - min(dd$year) + 1
 		if(time_case == "Monthly"){
@@ -116,7 +120,7 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 		for(g in unique(dd$group)){
 			ddo <- subset(dd, group == g)
 			if(use.rate){
-				E <- ddo$population
+				E <- ddo[, popCol]
 			}else{
 				E <- NULL
 			}

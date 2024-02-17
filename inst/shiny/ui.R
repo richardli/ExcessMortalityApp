@@ -47,7 +47,7 @@ ui <- fluidPage(
       h4("Select Model"),
       selectInput("which_model", NULL, choices=c("Poisson regression", "Simple Baseline"), width="300px"),
       br(),      
-      h4("Options"),
+      h4("Select Variables"),
       selectInput("raw_data_population", "Select Column Specifying Population Counts:", choices=c()),
       selectInput("raw_data_sex", "Select Column Specifying Sex:", choices=c()),
       selectInput("raw_data_age", "Select Column Specifying Age:", choices=c()),
@@ -118,7 +118,10 @@ ui <- fluidPage(
                           ),
                           plotlyOutput("baselinePlot"),
                           conditionalPanel("input.processMe", 
-                            downloadButton("download_baseplot", "Download Plot")
+                            downloadBttn("download_baseplot", "Download Plot", 
+                                    size = "sm", 
+                                    style = 'unite', 
+                                    color = 'primary')
                           ),
                           br(),
                           br(),
@@ -126,16 +129,24 @@ ui <- fluidPage(
               tabPanel(title = "Comparison By Age And Sex",
                           fluidRow(
                             column(3, 
-                                selectInput("compare_plot_show", h4("Plot type"), choices=c("Death Counts", "Excess Death Counts", "Excess Death Counts (Overlay)"), width="400px"), 
+                                selectInput("compare_plot_show", h4("Plot type"), choices=c("Death Counts", "Excess Death Counts", "Excess Death Counts (Overlay)"), width="600px"), 
                             ), 
                             column(3, 
                                 selectInput("compare_plot_by", h4("Comparison"), choices=c(), width="400px"), 
+                            ),
+                            column(5, 
+                                conditionalPanel("input.processMe", 
+                                  br(),
+                                  br(),
+                                  downloadBttn("download_compareplot", "Download Plot", 
+                                    size = "sm", 
+                                    style = 'unite', 
+                                    color = 'primary')
+                                ) 
                             )
                           ),
-                          plotlyOutput("comparePlot"),
-                          conditionalPanel("input.processMe", 
-                            downloadButton("download_compareplot", "Download Plot")
-                          )
+                          plotlyOutput("comparePlot")
+
                 ),
               tabPanel(title = "Historical Data Explorer",
                           fluidRow(
@@ -155,7 +166,7 @@ ui <- fluidPage(
                 withMathJax(includeMarkdown("method.rmd"))
               ),
               tabPanel(title = "How To Use The App",
-                withMathJax(includeMarkdown("instruction"))
+                withMathJax(includeMarkdown("instruction.rmd"))
               )
       )
     )

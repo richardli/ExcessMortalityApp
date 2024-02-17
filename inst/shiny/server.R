@@ -121,7 +121,6 @@ rv[["processed"]] <- FALSE
 
 observeEvent(input$processMe, {
        morData <- getData()
-       print(input$month_or_week)
        if(input$month_or_week == ""){
          output$message_file_upload <- renderText("Error: Please select a time scale.\n")
          return(NULL)
@@ -249,7 +248,11 @@ observeEvent(input$processMe, {
      req(input$processMe) 
      tryCatch({
        if(rv$processed) {
-        gg <- ggplotly(compare_plot(rv$excess, input$compare_plot_by, input$month_or_week, input$compare_plot_show)) 
+        g <- compare_plot(rv$excess, input$compare_plot_by, input$month_or_week, input$compare_plot_show)
+        ndim <- wrap_dims(length(unique(ggplot_build(g)$data[[1]]$PANEL)))
+        if(ndim[1] == 1) ndim[1] <- 1.5
+        if(ndim[2] == 1) ndim[2] <- 2
+        gg <- ggplotly(g) 
         # hack to fix plotly legend change with multiple aes
         for (i in 1:length(gg$x$data)){
             if (!is.null(gg$x$data[[i]]$name)){
@@ -258,7 +261,7 @@ observeEvent(input$processMe, {
             }
             }
         }
-        gg  
+        gg %>% layout(height = 360 * ndim[1], width = 300 * ndim[2] + 100) 
       }
       }, error = function(warn){
         return(NULL)
@@ -278,7 +281,6 @@ observeEvent(input$processMe, {
      tryCatch({
        if(rv$processed){
          tab <- rv$excess$excess[[input$baseline_show_sex]][[input$baseline_show_age]]
-         print(head(tab))
           if(input$month_or_week == "Monthly"){
               tab$Month <- tab$timeCol
               timeLabel = "Month"
@@ -301,7 +303,6 @@ observeEvent(input$processMe, {
               tab <- tab[with(tab, order(Year, Week)), ]
            }
            rownames(tab) <- NULL
-           print(head(tab))
            tab <- tab %>% 
                 DT::datatable(
                       extensions = 'Buttons', 

@@ -190,8 +190,8 @@ compare_plot <- function(model, by, month_or_week, plot_show){
                       ylab("Excess Deaths") +
                       theme_bw()+ 
                       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-                      scale_color_brewer("", palette = "Set1") + 
-                      scale_fill_brewer("", palette = "Set1")
+                      scale_color_brewer("", palette = "Dark2") + 
+                      scale_fill_brewer("", palette = "Dark2")
 
             }               
 
