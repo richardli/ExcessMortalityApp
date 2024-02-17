@@ -76,7 +76,7 @@ base_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, tim
 		out$lower <- out$mean + qnorm(0.025) * out$se
 		out$upper <- out$mean + qnorm(1 - 0.025) * out$se
 		out <- dplyr::left_join(dd, out)
-		out$timeCol <- out[, "timeCol"]
+		out$timeCol <- out[, timeCol]
 		return(out)
 	}
 

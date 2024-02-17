@@ -121,6 +121,11 @@ rv[["processed"]] <- FALSE
 
 observeEvent(input$processMe, {
        morData <- getData()
+       print(input$month_or_week)
+       if(input$month_or_week == ""){
+         output$message_file_upload <- renderText("Error: Please select a time scale.\n")
+         return(NULL)
+       }
        colnames(morData) <- tolower(colnames(morData))
        if("death" %in% colnames(morData) && "deaths" %in% colnames(morData) == FALSE){
           colnames(morData)[colnames(morData) == "death"] <- "deaths"
@@ -137,9 +142,9 @@ observeEvent(input$processMe, {
 
        if(!"timeCol" %in% colnames(morData)){
          if(time_case == "Monthly"){
-              output$message_file_upload <- renderText("'month' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
+              output$message_file_upload <- renderText("Error: 'month' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
           }else{
-              output$message_file_upload <- renderText("'week' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
+              output$message_file_upload <- renderText("Error: 'week' column does not exist in the input data. Check your data file or the time scale is selected correctly.")
           }
           rv$processed <- FALSE
           return(NULL)
@@ -147,22 +152,22 @@ observeEvent(input$processMe, {
           output$message_file_upload <- NULL
        }
        if(sum(is.na(as.numeric(morData$timeCol))) > 0){
-           output$message_file_upload <- renderText("Month or week in the input data include non-numerical values. Check your data file.")
+           output$message_file_upload <- renderText("Error: Month or week in the input data include non-numerical values. Check your data file.")
             return(NULL)
        }else{
           output$message_file_upload <- NULL
        }
        if(min(as.numeric(morData$timeCol), na.rm = TRUE) < 1){
-           output$message_file_upload <- renderText("Month or week in the input data do not start from 1. Check your data file.")
+           output$message_file_upload <- renderText("Error: Month or week in the input data do not start from 1. Check your data file.")
             return(NULL)
        }else{
           output$message_file_upload <- NULL
        }
        if(max(as.numeric(morData$timeCol), na.rm = TRUE) > T){
         if(time_case == "Monthly"){
-              output$message_file_upload <- renderText("More than 12 months are found in the input data. Check your data file or the time scale is selected correctly.")
+              output$message_file_upload <- renderText("Error: More than 12 months are found in the input data. Check your data file or the time scale is selected correctly.")
           }else{
-              output$message_file_upload <- renderText("More than 53 weeks are found in the input data. Check your data file or the time scale is selected correctly.")
+              output$message_file_upload <- renderText("Error: More than 53 weeks are found in the input data. Check your data file or the time scale is selected correctly.")
           }
           return(NULL)
        }else{
@@ -195,11 +200,11 @@ observeEvent(input$processMe, {
        updateSelectInput(session, "baseline_show_age", choices = c("All", unique(rv$cleanData$ageCol)))
        updateSelectInput(session, "table_show_sex", choices = c("All", unique(rv$cleanData$sexCol)))
        updateSelectInput(session, "table_show_age", choices = c("All", unique(rv$cleanData$ageCol)))
-       updateSelectInput(session, "compare_show", 
+       updateSelectInput(session, "compare_plot_by", 
             choices = c(
-                ifelse(is.null(unique(rv$cleanData$sexCol)), NULL, "by Sex"),
-                ifelse(is.null(unique(rv$cleanData$ageCol)), NULL, "by Age"),
-                ifelse(is.null(unique(rv$cleanData$sexCol)) || is.null(unique(rv$cleanData$sexCol)), NULL, "by Sex and Age")
+                ifelse(is.null(unique(rv$cleanData$sexCol)), NULL, "By Sex"),
+                ifelse(is.null(unique(rv$cleanData$ageCol)), NULL, "By Age"),
+                ifelse(is.null(unique(rv$cleanData$sexCol)) || is.null(unique(rv$cleanData$sexCol)), NULL, "By Sex and Age")
             )
         )
 
@@ -223,7 +228,6 @@ observeEvent(input$processMe, {
 )
 
 
-  # population excess
   output$baselinePlot <- renderPlotly({
      req(input$processMe) 
      tryCatch({
@@ -239,6 +243,34 @@ observeEvent(input$processMe, {
     }, 
     content = function(file) {
       ggsave(file, plot = mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show), width = 8, height = 5)
+    })
+
+  output$comparePlot <- renderPlotly({
+     req(input$processMe) 
+     tryCatch({
+       if(rv$processed) {
+        gg <- ggplotly(compare_plot(rv$excess, input$compare_plot_by, input$month_or_week, input$compare_plot_show)) 
+        # hack to fix plotly legend change with multiple aes
+        for (i in 1:length(gg$x$data)){
+            if (!is.null(gg$x$data[[i]]$name)){
+              if(substr(gg$x$data[[i]]$name, 1, 1) == "(" && substr(gg$x$data[[i]]$name, nchar(gg$x$data[[i]]$name) - 2, nchar(gg$x$data[[i]]$name)) == ",1)"){
+                  gg$x$data[[i]]$name =  substr(gg$x$data[[i]]$name, 2, nchar(gg$x$data[[i]]$name)- 3)    
+            }
+            }
+        }
+        gg  
+      }
+      }, error = function(warn){
+        return(NULL)
+      })
+  })
+
+  output$download_compareplot = downloadHandler(
+    filename = function() {
+      paste0(input$compare_plot_show, "_", input$month_or_week, "_", input$compare_plot_by, '.pdf')
+    }, 
+    content = function(file) {
+      ggsave(file, plot = compare_plot(rv$excess, input$compare_plot_by, input$month_or_week, input$compare_plot_show), width = 8)
     })
 
   output$baselineTab <- DT::renderDataTable({

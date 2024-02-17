@@ -171,7 +171,6 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 		return(excess)
 	}
 
-	print(head(morData))
 	# Output: baseline, sd, CI by month/week
 	base.all <- smooth_model_internal(time_case, T, years, morData, years_obs, grouping = NULL, use.rate = use.rate)
 	if(sum(morData[, sexCol] != "All") > 0){

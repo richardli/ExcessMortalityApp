@@ -20,11 +20,6 @@ ui <- fluidPage(
 
   sidebarLayout(
     sidebarPanel(
-    selectInput(inputId="month_or_week", label="Select Time Scale:",
-                  choices=c("Monthly" = "Monthly",
-                            "Weekly" = "Weekly"),
-                  width="150px"),
-      br(),
       h4("Data Input"),
       fileInput("readIn",
                 "Upload your own data here (CSV file)",
@@ -32,12 +27,31 @@ ui <- fluidPage(
                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
       h5("Details about the input data format are summarized in ",  tags$a(href="https://github.com/richardli/ExcessMortalityApp/blob/main/README.md", "this document.")),
       br(),
+      h4("Select Time Scale"),
+      selectizeInput(
+          inputId="month_or_week", label=NULL,
+          choices=c("Monthly" = "Monthly",
+                    "Weekly" = "Weekly"),
+          options = list(
+            placeholder = 'Please select an option below',
+            onInitialize = I('function() { this.setValue(""); }')
+          ),
+          width="300px"
+      ),
+      
+      # selectInput(inputId="month_or_week", label=NULL,
+      #             choices=c("Monthly" = "Monthly",
+      #                       "Weekly" = "Weekly"),
+      #             selected = NULL,
+      #             width="200px"),
+      h4("Select Model"),
+      selectInput("which_model", NULL, choices=c("Poisson regression", "Simple Baseline"), width="300px"),
+      br(),      
       h4("Options"),
       selectInput("raw_data_population", "Select Column Specifying Population Counts:", choices=c()),
       selectInput("raw_data_sex", "Select Column Specifying Sex:", choices=c()),
       selectInput("raw_data_age", "Select Column Specifying Age:", choices=c()),
-      selectInput("which_model", "Select Model:", choices=c("Poisson regression", "Simple Baseline")),
-      br(),
+
   
       conditionalPanel("output.fileUploaded", 
         shinyWidgets::actionBttn("processMe", 
@@ -109,13 +123,13 @@ ui <- fluidPage(
                           br(),
                           br(),
                           DT::dataTableOutput("baselineTab")),
-              tabPanel(title = "Comparison by Age and Sex",
+              tabPanel(title = "Comparison By Age And Sex",
                           fluidRow(
                             column(3, 
-                                selectInput("compare_plot_show", h4("Plot type"), choices=c("Side by Side", "Overlay"), width="400px"), 
+                                selectInput("compare_plot_show", h4("Plot type"), choices=c("Death Counts", "Excess Death Counts", "Excess Death Counts (Overlay)"), width="400px"), 
                             ), 
                             column(3, 
-                                selectInput("compare_show", h4("Comparison"), choices=c(), width="400px"), 
+                                selectInput("compare_plot_by", h4("Comparison"), choices=c(), width="400px"), 
                             )
                           ),
                           plotlyOutput("comparePlot"),
@@ -136,7 +150,13 @@ ui <- fluidPage(
                             )
                           ),
                           plotlyOutput("linePlotSummary"),
-                          tableOutput("tableSummary"))
+                          tableOutput("tableSummary")), 
+              tabPanel(title = "Methodology",
+                withMathJax(includeMarkdown("method.rmd"))
+              ),
+              tabPanel(title = "How To Use The App",
+                withMathJax(includeMarkdown("instruction"))
+              )
       )
     )
   )
