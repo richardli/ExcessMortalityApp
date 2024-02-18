@@ -9,6 +9,8 @@
 #' @param popCol column name for population variable
 #' @param timeCol column name for within-year time variable
 #' @param use.rate predict based on rate
+#' @param knots_per_year number of AR1 knots per year.
+#' @param return_model logical indicator to print the model summary
 #' 
 #' @import plotly  
 #' @import DT
@@ -31,40 +33,47 @@
 #' @examples
 #' library(INLA)
 #' data(SampleInput1)
-#' SampleInput1$sex <- SampleInput1$age <- "All"
-#' out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), morData = SampleInput1, 
-#' 			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "month")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' SampleInput1$sex <- SampleInput1$age <- "All" 
+#' out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), 
+#' 			  morData = SampleInput1, 
+#' 			  sexCol = "sex", ageCol = "age", 
+#' 			  popCol = "population", timeCol = "month")
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",
 #' 				month_or_week = "Monthly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month", 
 #' 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
 #'  
 #' data(SampleInput2)
-#' out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), morData = SampleInput2, 
-#' 			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "month")
-#' mortality_plot(model = out, sex = "All", age = "65+", 
+#' out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), 
+#' 			  morData = SampleInput2, 
+#' 			  sexCol = "sex", ageCol = "age", 
+#' 			  popCol = "population", timeCol = "month")
+#' mortality_plot(model = out, sex = "All", age = "65+", timeCol = "month", 
 #' 				month_or_week = "Monthly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "Female", age = "65+", 
+#' mortality_plot(model = out, sex = "Female", age = "65+", timeCol = "month", 
 #' 				month_or_week = "Monthly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "Male", age = "65+", 
+#' mortality_plot(model = out, sex = "Male", age = "65+",  timeCol = "month",
 #' 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
+#' 
 #' data(SampleInput3)
 #' SampleInput3$sex <- SampleInput3$age <- "All"
-#' out <- smooth_model(time_case = "Weekly", T = 52, years = c(2015:2021), morData = SampleInput3, 
-#' 			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "week")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' out <- smooth_model(time_case = "Weekly", T = 52, years = c(2015:2021), 
+#' 			  morData = SampleInput3, 
+#' 			  sexCol = "sex", ageCol = "age", 
+#' 			  popCol = "population", timeCol = "week")
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "week",
 #' 				month_or_week = "Weekly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "week",
 #' 				month_or_week = "Weekly", plot_show = "Excess Death Counts")
+#' 
 #' data(SampleInput3)
-#' out <- smooth_model(time_case = "Weekly", T = 53, years = c(2015:2021), morData = SampleInput3, 
-#' 			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "week")
-#' mortality_plot(model = out, sex = "Female", age = "65+", 
-#' 				month_or_week = "Weekly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "Male", age = "65+", 
-#' 				month_or_week = "Weekly", plot_show = "Excess Death Counts")
+#' out <- smooth_model(time_case = "Weekly", T = 53, years = c(2015:2021), 
+#' 			  morData = SampleInput3, 
+#' 			  sexCol = "sex", ageCol = "age", 
+#' 			  popCol = "population", timeCol = "week", return_model=TRUE)
+#' summary(out$model$all[[1]])
 
-smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, timeCol, use.rate = TRUE){
+smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, timeCol, use.rate = TRUE, knots_per_year = 4, return_model = FALSE){
 	group <- inla <- NULL 
     if(!isTRUE(requireNamespace("INLA", quietly = TRUE))) {
          stop("You need to install the packages 'INLA'. Please run in your R terminal:\n  install.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
@@ -98,16 +107,30 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 			n.seas <- 12
 		}else{
 			dd$periodID <- dd[, timeCol]
-			dd$periodID[dd$periodID == 53] <- 52
 			n.seas <- 52
 		}
 		dd$timeID <- (dd$yearID - 1) * max(dd$periodID) + dd$periodID
+		if(time_case == "Weekly") dd$periodID[dd$periodID == 53] <- 52
 		dd$timeID <- match(dd$timeID, sort(unique(dd$timeID), decreasing = FALSE))
 		hyperar1 = list(prec = list(prior = "pc.prec", param = c(1, 0.01)), 
                 theta2 = list(prior = "pc.cor1", param = c(.7, .9)))
+		hyperprec = list(prec = list(prior = "pc.prec", param = c(1, 0.01)))
 
-		m <- deaths ~ f(periodID, model = "seasonal", season.length=n.seas) + 
-					  f(timeID, model = "ar1", hyper = hyperar1)
+		TT <- max(dd$timeID)
+		if(time_case == "Monthly"){
+			np <- 12 / knots_per_year
+		}else{
+			np <- 52 / knots_per_year
+		}
+		knots <- seq(1, TT, by = np)
+		mesh1d <- inla.mesh.1d(loc=knots)
+		mat <- inla.spde.make.A(mesh=mesh1d, loc=1:TT)
+		m <- deaths ~ -1 + intercept  + f(period, model = "rw1", hyper = hyperprec, constr = TRUE) + 
+					  f(wtimeID, model = "ar1", hyper = hyperar1)
+		 
+
+		# m <- deaths ~ f(periodID, model = "seasonal", season.length=n.seas, constr = TRUE) + 
+		# 			  f(timeID, model = "ar1", hyper = hyperar1)
 		 
 		
 		dd <- dd[order(dd$timeID), ]
@@ -117,6 +140,7 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 			dd$group <- 1
 		}			 
 		out <- NULL
+		fitall <- NULL
 		for(g in unique(dd$group)){
 			ddo <- subset(dd, group == g)
 			if(use.rate){
@@ -125,9 +149,22 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 				E <- NULL
 			}
 			ddo$deaths[!ddo$year %in% years_obs] <- NA
-			fit <- inla(m, data = ddo, family='poisson', E = E,
-			              control.predictor=list(compute=TRUE, link = 1))
-			pred <- fit$summary.fitted.values[, c("mean", "0.025quant", "0.975quant")]
+
+			# w1.t <- 2*pi/n.seas*ddo$timeID
+			# w2.t <- 2*pi/n.seas*2*ddo$timeID
+			stk <- inla.stack(data = list(deaths = ddo$deaths),  
+							  A = list(1, mat), 
+							  effect = list(list(intercept=1, 
+							  					 time = ddo$timeID,
+							  					 period = ddo$periodID), 
+							  				list(wtimeID = 1:dim(mat)[2]))
+							  )
+			fit <- inla(m, data = inla.stack.data(stk),
+						  family='poisson', E = E,
+			              control.predictor=list(A = inla.stack.A(stk), compute=TRUE, link = 1))
+			fitall[[g]] <- fit
+
+			pred <- fit$summary.fitted.values[1:TT, c("0.5quant", "0.025quant", "0.975quant")]
 			colnames(pred) <- c("mean", "lower", "upper")
 			dd1 <- cbind(subset(dd, group == g), pred)
 			if(!is.null(E)){
@@ -141,8 +178,11 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 				out <- rbind(out, dd1[, c("timeID", "year", timeCol, grouping, "deaths","mean", "lower", "upper")])
 			}
 		}
-		colnames(out)[3] <- "timeCol"
-		return(out)
+		if(return_model){
+			return(list(out, fitall))
+		}else{
+			return(out)
+		}
 	}
 
 	excess_internal <- function(time_case, T, years, pandData, baseEst, grouping = NULL, use.rate){
@@ -196,27 +236,55 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 		colnames(base.sexage)[1:2] <- c(ageCol, sexCol)
 	}
 
-	base.out <- NULL 
-	base.out[["All"]][["All"]] <- base.all
-	for(s in unique(morData[, sexCol])){
-		base.out[[s]][["All"]] <- base.sex[base.sex[, sexCol] == s, ]
-	}
-	for(a in unique(morData[, ageCol])){
-		base.out[["All"]][[a]] <- base.age[base.age[, ageCol] == a, ]
-	}
-	for(s in unique(morData[, sexCol])){
-		for(a in unique(morData[, ageCol])){
-			base.out[[s]][[a]] <- base.sexage[base.sexage[, sexCol] == s & base.sexage[, ageCol] == a, ]
+	if(!return_model){
+		base.out <- NULL 
+		base.out[["All"]][["All"]] <- base.all
+		for(s in unique(morData[, sexCol])){
+			base.out[[s]][["All"]] <- base.sex[base.sex[, sexCol] == s, ]
 		}
+		for(a in unique(morData[, ageCol])){
+			base.out[["All"]][[a]] <- base.age[base.age[, ageCol] == a, ]
+		}
+		for(s in unique(morData[, sexCol])){
+			for(a in unique(morData[, ageCol])){
+				base.out[[s]][[a]] <- base.sexage[base.sexage[, sexCol] == s & base.sexage[, ageCol] == a, ]
+			}
+		}
+	}else{
+		base.out <- NULL 
+		base.out[["All"]][["All"]] <- base.all[[1]]
+		for(s in unique(morData[, sexCol])){
+			base.out[[s]][["All"]] <- base.sex[[1]][base.sex[[1]][, sexCol] == s, ]
+		}
+		for(a in unique(morData[, ageCol])){
+			base.out[["All"]][[a]] <- base.age[[1]][base.age[[1]][, ageCol] == a, ]
+		}
+		for(s in unique(morData[, sexCol])){
+			for(a in unique(morData[, ageCol])){
+				base.out[[s]][[a]] <- base.sexage[[1]][base.sexage[[1]][, sexCol] == s & base.sexage[[1]][, ageCol] == a, ]
+			}
+		}
+		model.out <- list(all = base.all[[2]], 
+						  sex = base.sex[[2]], 
+						  age = base.age[[2]], 
+						  sexage = base.sexage[[2]])
 	}
+	
 
 
 	# Output: excess, sd, CI by month/week and year
 	pand <- subset(morData, year %in% years_pand)
-	excess.all <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.all, grouping = NULL, use.rate = use.rate)
-	excess.sex <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sex, grouping = sexCol, use.rate = use.rate)
-	excess.age <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.age, grouping = ageCol, use.rate = use.rate)
-	excess.sexage <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sexage, grouping = c(sexCol, ageCol), use.rate = use.rate)
+	if(!return_model){
+		excess.all <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.all, grouping = NULL, use.rate = use.rate)
+		excess.sex <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sex, grouping = sexCol, use.rate = use.rate)
+		excess.age <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.age, grouping = ageCol, use.rate = use.rate)
+		excess.sexage <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sexage, grouping = c(sexCol, ageCol), use.rate = use.rate)
+	}else{
+		excess.all <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.all[[1]], grouping = NULL, use.rate = use.rate)
+		excess.sex <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sex[[1]], grouping = sexCol, use.rate = use.rate)
+		excess.age <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.age[[1]], grouping = ageCol, use.rate = use.rate)
+		excess.sexage <- excess_internal(time_case, T, years, pandData = pand, baseEst = base.sexage[[1]], grouping = c(sexCol, ageCol), use.rate = use.rate)
+	}
 
 	excess.out <- NULL 
 	excess.out[["All"]][["All"]] <- excess.all
@@ -232,8 +300,11 @@ smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, t
 		}
 	}
 
-	return(list(base = base.out, excess = excess.out))
-
+	if(!return_model){
+		return(list(base = base.out, excess = excess.out))
+	}else{
+		return(list(base = base.out, excess = excess.out, model = model.out))
+	}
 
 
 }
