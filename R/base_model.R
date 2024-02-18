@@ -14,6 +14,7 @@
 #' @import DT
 #' @import shinyWidgets
 #' @import shinybusy
+#' @import markdown
 #' @importFrom shinyjs useShinyjs
 #' @importFrom stats sd aggregate qnorm as.formula
 #' @importFrom grDevices colorRampPalette 
