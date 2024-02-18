@@ -25,7 +25,9 @@ ui <- fluidPage(
                 "Upload your own data here (CSV file)",
                 multiple = FALSE,
                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-      h5("Details about the input data format are summarized in ",  tags$a(href="https://github.com/richardli/ExcessMortalityApp/blob/main/README.md", "this document.")),
+      div(style = "margin-top: -30px"),
+      actionLink("instruction_link", label = "Have questions? Read the instructions on how to use the App."),
+      br(),
       br(),
       h4("Select Time Scale"),
       selectizeInput(
@@ -163,11 +165,25 @@ ui <- fluidPage(
                           plotlyOutput("linePlotSummary"),
                           tableOutput("tableSummary")), 
               tabPanel(title = "Methodology",
+                withMathJax(),
+                tags$div(HTML("<script type='text/x-mathjax-config'>
+                MathJax.Hub.Config({
+                'HTML-CSS': {
+                      fonts: ['TeX'],
+                      styles: {
+                        scale: 110,
+                        '.MathJax': { padding: '1em 0.1em', color: 'royalblue ! important' }
+                      }
+                    }
+                });
+                </script>
+                ")),
                 withMathJax(includeMarkdown("method.rmd"))
               ),
               tabPanel(title = "How To Use The App",
                 withMathJax(includeMarkdown("instruction.rmd"))
-              )
+              ), 
+        id = "navbar_id"
       )
     )
   )

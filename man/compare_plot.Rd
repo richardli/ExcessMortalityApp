@@ -4,7 +4,7 @@
 \alias{compare_plot}
 \title{Function to plot multiple excess mortality estimates}
 \usage{
-compare_plot(model, by, month_or_week, plot_show)
+compare_plot(model, by, month_or_week, plot_show, timeCol = "timeCol")
 }
 \arguments{
 \item{model}{output from base_model}
@@ -14,6 +14,8 @@ compare_plot(model, by, month_or_week, plot_show)
 \item{month_or_week}{character variable for monthly or weekly input}
 
 \item{plot_show}{character variable for which plot to show}
+
+\item{timeCol}{column specifying time variable}
 }
 \value{
 a ggplot object
@@ -23,36 +25,35 @@ Function to plot multiple excess mortality estimates
 }
 \examples{
 data(SampleInput3)
-SampleInput3$timeCol <- SampleInput3$week
 out <- base_model(time_case = "Weekly", T = 53, 
 			  years = c(2015:2021), morData = SampleInput3, 
 			  sexCol = "sex", ageCol = "age", 
-			  popCol = "population", timeCol = "timeCol")
-compare_plot(model = out, by = "By Sex",
+			  popCol = "population", timeCol = "week")
+compare_plot(model = out, by = "By Sex",timeCol = "week",
 			  month_or_week = "Weekly", 
            plot_show = "Death Counts")
-compare_plot(model = out, by = "By Age",
+compare_plot(model = out, by = "By Age",timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Death Counts")
-compare_plot(model = out, by = "By Sex and Age",
+compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Death Counts")
-compare_plot(model = out, by = "By Sex",
+compare_plot(model = out, by = "By Sex", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts")
-compare_plot(model = out, by = "By Age",
+compare_plot(model = out, by = "By Age", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts")
-compare_plot(model = out, by = "By Sex and Age",
+compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts")
-compare_plot(model = out, by = "By Sex",
+compare_plot(model = out, by = "By Sex", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts (Overlay)")
-compare_plot(model = out, by = "By Age",
+compare_plot(model = out, by = "By Age", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts (Overlay)")
-compare_plot(model = out, by = "By Sex and Age",
+compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
            month_or_week = "Weekly", 
            plot_show = "Excess Death Counts (Overlay)")
 }

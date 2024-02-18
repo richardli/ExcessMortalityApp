@@ -74,7 +74,7 @@
 #' summary(out$model$all[[1]])
 
 smooth_model <- function(time_case, T, years, morData, sexCol, ageCol, popCol, timeCol, use.rate = TRUE, knots_per_year = 4, return_model = FALSE){
-	group <- inla <- NULL 
+	group <- inla <- inla.mesh.1d <- inla.spde.make.A <- inla.stack <- inla.stack.A <- inla.stack.data <-  NULL 
     if(!isTRUE(requireNamespace("INLA", quietly = TRUE))) {
          stop("You need to install the packages 'INLA'. Please run in your R terminal:\n  install.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
     }

@@ -2,6 +2,11 @@
 
 function(input, output, session) {
 
+
+  observeEvent(input$instruction_link, {
+    updateNavbarPage(session, inputId = "navbar_id", selected = "How To Use The App")
+  })
+
   ## Read in data
   rvFile <- reactiveValues(clear = 0)
   getData <- reactive({
@@ -261,7 +266,8 @@ observeEvent(input$processMe, {
             }
             }
         }
-        gg %>% layout(height = 360 * ndim[1], width = 320 * ndim[2] + 200) 
+        ww <- ifelse(input$month_or_week == "Monthly", 300, 500)
+        gg %>% layout(height = 360 * ndim[1], width = ww * ndim[2] + 200) 
       }
       }, error = function(warn){
         return(NULL)

@@ -13,7 +13,9 @@ smooth_model(
   ageCol,
   popCol,
   timeCol,
-  use.rate = TRUE
+  use.rate = TRUE,
+  knots_per_year = 4,
+  return_model = FALSE
 )
 }
 \arguments{
@@ -34,6 +36,10 @@ smooth_model(
 \item{timeCol}{column name for within-year time variable}
 
 \item{use.rate}{predict based on rate}
+
+\item{knots_per_year}{number of AR1 knots per year.}
+
+\item{return_model}{logical indicator to print the model summary}
 }
 \value{
 a list of calculated excess mortality
@@ -44,36 +50,43 @@ Function to create baseline prediction and compute excess using time series mode
 \examples{
 library(INLA)
 data(SampleInput1)
-SampleInput1$sex <- SampleInput1$age <- "All"
-out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), morData = SampleInput1, 
-			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "month")
-mortality_plot(model = out, sex = "All", age = "All", 
+SampleInput1$sex <- SampleInput1$age <- "All" 
+out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), 
+			  morData = SampleInput1, 
+			  sexCol = "sex", ageCol = "age", 
+			  popCol = "population", timeCol = "month")
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",
 				month_or_week = "Monthly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "All", age = "All", 
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "month", 
 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
  
 data(SampleInput2)
-out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), morData = SampleInput2, 
-			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "month")
-mortality_plot(model = out, sex = "All", age = "65+", 
+out <- smooth_model(time_case = "Monthly", T = 12, years = c(2015:2021), 
+			  morData = SampleInput2, 
+			  sexCol = "sex", ageCol = "age", 
+			  popCol = "population", timeCol = "month")
+mortality_plot(model = out, sex = "All", age = "65+", timeCol = "month", 
 				month_or_week = "Monthly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "Female", age = "65+", 
+mortality_plot(model = out, sex = "Female", age = "65+", timeCol = "month", 
 				month_or_week = "Monthly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "Male", age = "65+", 
+mortality_plot(model = out, sex = "Male", age = "65+",  timeCol = "month",
 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
+
 data(SampleInput3)
 SampleInput3$sex <- SampleInput3$age <- "All"
-out <- smooth_model(time_case = "Weekly", T = 52, years = c(2015:2021), morData = SampleInput3, 
-			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "week")
-mortality_plot(model = out, sex = "All", age = "All", 
+out <- smooth_model(time_case = "Weekly", T = 52, years = c(2015:2021), 
+			  morData = SampleInput3, 
+			  sexCol = "sex", ageCol = "age", 
+			  popCol = "population", timeCol = "week")
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "week",
 				month_or_week = "Weekly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "All", age = "All", 
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "week",
 				month_or_week = "Weekly", plot_show = "Excess Death Counts")
+
 data(SampleInput3)
-out <- smooth_model(time_case = "Weekly", T = 53, years = c(2015:2021), morData = SampleInput3, 
-			  sexCol = "sex", ageCol = "age", popCol = "population", timeCol = "week")
-mortality_plot(model = out, sex = "Female", age = "65+", 
-				month_or_week = "Weekly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "Male", age = "65+", 
-				month_or_week = "Weekly", plot_show = "Excess Death Counts")
+out <- smooth_model(time_case = "Weekly", T = 53, years = c(2015:2021), 
+			  morData = SampleInput3, 
+			  sexCol = "sex", ageCol = "age", 
+			  popCol = "population", timeCol = "week", return_model=TRUE)
+summary(out$model$all[[1]])
 }

@@ -4,7 +4,7 @@
 \alias{mortality_plot}
 \title{Function to plot excess mortality}
 \usage{
-mortality_plot(model, sex, age, month_or_week, plot_show)
+mortality_plot(model, sex, age, month_or_week, plot_show, timeCol = "timeCol")
 }
 \arguments{
 \item{model}{output from base_model}
@@ -16,6 +16,8 @@ mortality_plot(model, sex, age, month_or_week, plot_show)
 \item{month_or_week}{character variable for monthly or weekly input}
 
 \item{plot_show}{character variable for which plot to show}
+
+\item{timeCol}{column specifying time variable}
 }
 \value{
 a ggplot object
@@ -26,25 +28,23 @@ Function to plot excess mortality
 \examples{
 data(SampleInput1)
 SampleInput1$sex <- SampleInput1$age <- "All"
-SampleInput1$timeCol <- SampleInput1$month
 out <- base_model(time_case = "Monthly", T = 12, 
 			  years = c(2015:2021), morData = SampleInput1, 
 			  sexCol = "sex", ageCol = "age", 
-			  popCol = "population", timeCol = "timeCol")
-mortality_plot(model = out, sex = "All", age = "All", 
+			  popCol = "population", timeCol = "month")
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",  
 				month_or_week = "Monthly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "All", age = "All", 
+mortality_plot(model = out, sex = "All", age = "All", timeCol = "month", 
 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
 
 data(SampleInput3)
-SampleInput3$timeCol <- SampleInput3$week
 out <- base_model(time_case = "Weekly", T = 53, 
 			  years = c(2015:2021), morData = SampleInput3, 
 			  sexCol = "sex", ageCol = "age", 
-			  popCol = "population", timeCol = "timeCol")
-mortality_plot(model = out, sex = "Male", age = "All", 
+			  popCol = "population", timeCol = "week")
+mortality_plot(model = out, sex = "Male", age = "All", timeCol = "week",
 			  month_or_week = "Weekly", plot_show = "Death Counts")
-mortality_plot(model = out, sex = "Female", age = "All", 
+mortality_plot(model = out, sex = "Female", age = "All", timeCol = "week", 
 			  month_or_week = "Weekly", plot_show = "Excess Death Counts")
 
 }
