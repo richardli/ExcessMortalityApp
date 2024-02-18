@@ -1,6 +1,7 @@
 #' Function to plot multiple excess mortality estimates
 #' 
 #' @param model output from base_model
+#' @param timeCol column specifying time variable
 #' @param by character variable for "By Sex", "By Age", or "By Sex and Age"
 #' @param month_or_week character variable for monthly or weekly input
 #' @param plot_show character variable for which plot to show
@@ -9,40 +10,39 @@
 #' 
 #' @examples
 #' data(SampleInput3)
-#' SampleInput3$timeCol <- SampleInput3$week
 #' out <- base_model(time_case = "Weekly", T = 53, 
 #' 			  years = c(2015:2021), morData = SampleInput3, 
 #' 			  sexCol = "sex", ageCol = "age", 
-#' 			  popCol = "population", timeCol = "timeCol")
-#' compare_plot(model = out, by = "By Sex",
+#' 			  popCol = "population", timeCol = "week")
+#' compare_plot(model = out, by = "By Sex",timeCol = "week",
 #' 			  month_or_week = "Weekly", 
 #'            plot_show = "Death Counts")
-#' compare_plot(model = out, by = "By Age",
+#' compare_plot(model = out, by = "By Age",timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Death Counts")
-#' compare_plot(model = out, by = "By Sex and Age",
+#' compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Death Counts")
-#' compare_plot(model = out, by = "By Sex",
+#' compare_plot(model = out, by = "By Sex", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts")
-#' compare_plot(model = out, by = "By Age",
+#' compare_plot(model = out, by = "By Age", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts")
-#' compare_plot(model = out, by = "By Sex and Age",
+#' compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts")
-#' compare_plot(model = out, by = "By Sex",
+#' compare_plot(model = out, by = "By Sex", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts (Overlay)")
-#' compare_plot(model = out, by = "By Age",
+#' compare_plot(model = out, by = "By Age", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts (Overlay)")
-#' compare_plot(model = out, by = "By Sex and Age",
+#' compare_plot(model = out, by = "By Sex and Age", timeCol = "week",
 #'            month_or_week = "Weekly", 
 #'            plot_show = "Excess Death Counts (Overlay)")
 
-compare_plot <- function(model, by, month_or_week, plot_show){
+compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol"){
 	   lower <- upper <- deaths <- year <- excess <- time <- plot.group <- NULL 
 
         
@@ -87,10 +87,10 @@ compare_plot <- function(model, by, month_or_week, plot_show){
 
 	   toplot1$year <- factor(toplot1$year)
        if(month_or_week == "Monthly"){
-          toplot1$month <- toplot1$timeCol
+          toplot1$month <- toplot1[, timeCol]
           timeLabel = "month"
        }else{
-          toplot1$week <- toplot1$timeCol
+          toplot1$week <- toplot1[, timeCol]
           timeLabel = "week"
        }
   
@@ -183,10 +183,10 @@ compare_plot <- function(model, by, month_or_week, plot_show){
                 if(by == "By Sex and Age"){
                     toplot1$plot.group <- paste0(toplot1$plot.group.age, ", ",  toplot1$plot.group.sex)
                 }
-                g <- ggplot(toplot1) + aes(fill = plot.group, color = plot.group) +
-                      geom_ribbon(aes(x = time, ymin = lower, ymax = upper), color = NA, alpha = 0.2) +  
+                g <- ggplot(toplot1) + aes(fill = plot.group, color = plot.group, x = time, ymin = lower, ymax = upper, y = excess) +
+                      geom_ribbon(color = NA, alpha = 0.2) +  
                       geom_hline(yintercept = 0, color = "#404040", linetype = 2) + 
-                      geom_line(aes(x = time, y = excess), alpha = 0.9, linewidth = 0.9) + 
+                      geom_line(alpha = 0.9, linewidth = 0.9) + 
                       ylab("Excess Deaths") +
                       theme_bw()+ 
                       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 

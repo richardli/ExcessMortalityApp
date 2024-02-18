@@ -4,6 +4,7 @@
 #' @param sex character variable for sex
 #' @param age character variable for age
 #' @param month_or_week character variable for monthly or weekly input
+#' @param timeCol column specifying time variable
 #' @param plot_show character variable for which plot to show
 #' @return a ggplot object
 #' @export
@@ -11,41 +12,39 @@
 #' @examples
 #' data(SampleInput1)
 #' SampleInput1$sex <- SampleInput1$age <- "All"
-#' SampleInput1$timeCol <- SampleInput1$month
 #' out <- base_model(time_case = "Monthly", T = 12, 
 #' 			  years = c(2015:2021), morData = SampleInput1, 
 #' 			  sexCol = "sex", ageCol = "age", 
-#' 			  popCol = "population", timeCol = "timeCol")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' 			  popCol = "population", timeCol = "month")
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",  
 #' 				month_or_week = "Monthly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "All", age = "All", 
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month", 
 #' 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
 #' 
 #' data(SampleInput3)
-#' SampleInput3$timeCol <- SampleInput3$week
 #' out <- base_model(time_case = "Weekly", T = 53, 
 #' 			  years = c(2015:2021), morData = SampleInput3, 
 #' 			  sexCol = "sex", ageCol = "age", 
-#' 			  popCol = "population", timeCol = "timeCol")
-#' mortality_plot(model = out, sex = "Male", age = "All", 
+#' 			  popCol = "population", timeCol = "week")
+#' mortality_plot(model = out, sex = "Male", age = "All", timeCol = "week",
 #' 			  month_or_week = "Weekly", plot_show = "Death Counts")
-#' mortality_plot(model = out, sex = "Female", age = "All", 
+#' mortality_plot(model = out, sex = "Female", age = "All", timeCol = "week", 
 #' 			  month_or_week = "Weekly", plot_show = "Excess Death Counts")
 #' 
 
-mortality_plot <- function(model, sex, age, month_or_week, plot_show){
+mortality_plot <- function(model, sex, age, month_or_week, plot_show, timeCol = "timeCol"){
 	   lower <- upper <- deaths <- year <- excess <- time <- NULL 
 
 	   toplot1 <- model$base[[sex]][[age]]
        toplot2 <- model$excess[[sex]][[age]]
        toplot2$year <- factor(toplot2$year)
        if(month_or_week == "Monthly"){
-          toplot1$month <- toplot1$timeCol
-          toplot2$month <- toplot2$timeCol
+          toplot1$month <- toplot1[, timeCol]
+          toplot2$month <- toplot2[, timeCol]
           timeLabel = "month"
        }else{
-          toplot1$week <- toplot1$timeCol
-          toplot2$week <- toplot2$timeCol
+          toplot1$week <- toplot1[, timeCol]
+          toplot2$week <- toplot2[, timeCol]
           timeLabel = "week"
        }
 
