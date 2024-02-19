@@ -1,6 +1,9 @@
 require("plotly")
 require("DT")
 require("ExcessMortalityApp")
+require("markdown")
+require("INLA")
+
 ui <- fluidPage(
   use_busy_spinner(spin = "fading-circle"),
 
@@ -25,7 +28,7 @@ ui <- fluidPage(
                 "Upload your own data here (CSV file)",
                 multiple = FALSE,
                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-      div(style = "margin-top: -30px"),
+      div(style = "margin-top: -20px"),
       actionLink("instruction_link", label = "Have questions? Read the instructions on how to use the App."),
       br(),
       br(),

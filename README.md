@@ -53,9 +53,17 @@ When errors occur, the most likely reason is because the input data are ill-form
 
 # Version history
 
+## version 0.2.0
+This version added a new smoothing model and several visualizations. 
+
 ## version 0.1.0
 This version replicates the calculator by [Vital Strategies](https://preventepidemics.org/covid19/resources/excess-mortality/).
 
 
+# Acknowledgement
+
+The work is supported by Vital Strategies.
+
+The deployment of this App to shinyapps.io uses the INLA repository at [https://github.com/inbo/INLA](https://github.com/inbo/INLA) to get around the issue of INLA not being on github or CRAN. Thanks INBO!
 
 
