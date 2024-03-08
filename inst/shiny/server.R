@@ -194,6 +194,13 @@ observeEvent(input$processMe, {
        }else{
         colnames(morData)[which(colnames(morData) == tolower(input$raw_data_age))] <- "ageCol"
        }
+       # Change max history to 10 years
+       morData <- subset(morData, year >= 2010)
+       print(dim(morData))
+       if(dim(morData)[1] == 0 ){
+            output$message_file_upload <- renderText("Error: no data after 2010 in the input. Check the formatting of the 'year' column to make sure it is numeric.")
+             return(NULL)
+       }
        rv[['cleanData']] <- morData
        years <- sort(unique(morData$year))
 
@@ -235,7 +242,7 @@ observeEvent(input$processMe, {
   output$baselinePlot <- renderPlotly({
      req(input$processMe) 
      tryCatch({
-       if(rv$processed) ggplotly(mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show)) %>% layout(legend = list(orientation = "v", x = 0.02, y = 0.95))
+       if(rv$processed) ggplotly(mortality_plot(rv$excess, input$baseline_show_sex, input$baseline_show_age, input$month_or_week, input$plot_show), tooltip = "text") %>% layout(legend = list(orientation = "v", x = 0.02, y = 0.95))
       }, error = function(warn){
         return(NULL)
       })
@@ -257,15 +264,15 @@ observeEvent(input$processMe, {
         ndim <- wrap_dims(length(unique(ggplot_build(g)$data[[1]]$PANEL)))
         if(ndim[1] == 1) ndim[1] <- 1.5
         if(ndim[2] == 1) ndim[2] <- 2
-        gg <- ggplotly(g) 
+        gg <- ggplotly(g, tooltip = "text") 
         # hack to fix plotly legend change with multiple aes
-        for (i in 1:length(gg$x$data)){
-            if (!is.null(gg$x$data[[i]]$name)){
-              if(substr(gg$x$data[[i]]$name, 1, 1) == "(" && substr(gg$x$data[[i]]$name, nchar(gg$x$data[[i]]$name) - 2, nchar(gg$x$data[[i]]$name)) == ",1)"){
-                  gg$x$data[[i]]$name =  substr(gg$x$data[[i]]$name, 2, nchar(gg$x$data[[i]]$name)- 3)    
-            }
-            }
-        }
+        # for (i in 1:length(gg$x$data)){
+        #     if (!is.null(gg$x$data[[i]]$name)){
+        #       if(substr(gg$x$data[[i]]$name, 1, 1) == "(" && substr(gg$x$data[[i]]$name, nchar(gg$x$data[[i]]$name) - 2, nchar(gg$x$data[[i]]$name)) == ",1)"){
+        #           gg$x$data[[i]]$name =  substr(gg$x$data[[i]]$name, 2, nchar(gg$x$data[[i]]$name)- 3)    
+        #     }
+        #     }
+        # }
         ww <- ifelse(input$month_or_week == "Monthly", 300, 500)
         gg %>% layout(height = 360 * ndim[1], width = ww * ndim[2] + 200) 
       }

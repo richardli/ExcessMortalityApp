@@ -15,7 +15,7 @@ ui <- fluidPage(
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
   ),
   titlePanel("Excess Mortality Calculator"),
-  p("Developed by the openVA team", a(href="https://openva.net", "(https://openVA.net)."), "This work is supported by Vital Strategies",
+  p("Developed by the openVA team", a(href="https://openva.net", "(https://openVA.net)."), "This work is supported by Vital Strategies as part of the Bloomberg Philanthropies Data for Health Initiative.",
     HTML("&emsp;"),
     tags$a(img(src="vital_strategies.png", style="width:100px"), href="https://www.vitalstrategies.org/")),
   hr(),
@@ -29,7 +29,7 @@ ui <- fluidPage(
                 multiple = FALSE,
                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
       div(style = "margin-top: -20px"),
-      actionLink("instruction_link", label = "Have questions? Read the instructions on how to use the App."),
+      actionLink("instruction_link", label = "Have questions? Read the instructions on how to use the App. You can also refer to the Example input data at the bottom of this section."),
       br(),
       br(),
       h4("Select Time Scale"),
@@ -50,7 +50,7 @@ ui <- fluidPage(
       #             selected = NULL,
       #             width="200px"),
       h4("Select Model"),
-      selectInput("which_model", NULL, choices=c("Poisson regression", "Simple Baseline"), width="300px"),
+      selectInput("which_model", NULL, choices=c("Poisson Regression", "Simple Baseline"), width="300px"),
       br(),      
       h4("Select Variables"),
       selectInput("raw_data_population", "Select Column Specifying Population Counts:", choices=c()),
@@ -112,7 +112,7 @@ ui <- fluidPage(
                  tabPanel(title = "Excess Mortality",
                           fluidRow(
                             column(3, 
-                                selectInput("plot_show", h4("Plot type"), choices=c("Death Counts", "Excess Death Counts"), width="400px"), 
+                                selectInput("plot_show", h4("Plot type"), choices=c("Death Counts", "Death Counts (Y-axis Starting From 0)", "Excess Death Counts"), width="400px"), 
                             ), 
                             column(3, 
                                 selectInput("baseline_show_sex", h4("Sex"), choices=c(), width="400px"), 
@@ -128,6 +128,7 @@ ui <- fluidPage(
                                     style = 'unite', 
                                     color = 'primary')
                           ),
+
                           br(),
                           br(),
                           DT::dataTableOutput("baselineTab")),
@@ -156,7 +157,7 @@ ui <- fluidPage(
               tabPanel(title = "Historical Data Explorer",
                           fluidRow(
                             column(3,
-                              selectInput("table_show_type", h4("Historical data"), choices=c("Death Counts", "Death Rate (number of deaths per 100,000 population)"), width="400px")
+                              selectInput("table_show_type", h4("Historical Data"), choices=c("Death Counts", "Death Rate Number of Deaths Per 100,000 Population)"), width="400px")
                             ), 
                             column(3,
                                 selectInput("table_show_sex", h4("Sex"), choices=c(), width="400px"), 
