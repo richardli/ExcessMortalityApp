@@ -83,6 +83,7 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
                     toplot1 <- rbind(toplot1, tmp)
                 }
             }
+            toplot1$plot.group <- paste0(toplot1$plot.group.age, ", ",  toplot1$plot.group.sex)
        }
 
 	   toplot1$year <- factor(toplot1$year)
@@ -95,7 +96,8 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
        }
   
        # plotly ribborn requires no NA values
-       toplot1 <- subset(toplot1, !is.na(lower))       
+       toplot1 <- subset(toplot1, !is.na(lower))    
+       
     
        if(plot_show == "Death Counts"){
             title <- paste0("Observed Deaths by ", ifelse(month_or_week == "Monthly", "Month", "Week"), 
@@ -114,11 +116,22 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
               weeks_sorted <- weeks_all[order(toplot1$time_order[match(weeks_all, toplot1$time)])]
               toplot1$time <- match(toplot1$time,  weeks_sorted)
             }
-            g <- ggplot(toplot1) + 
-                  geom_ribbon(aes(x = time, ymin = lower, ymax = upper), 
-                              fill = "#a6cee3", color = NA, alpha = 0.5) + 
-                  geom_line(aes(x = time, y = mean, color = "Expected Deaths")) + 
-                  geom_line(aes(x = time, y = deaths, color = 'Observed Deaths'), linewidth = 0.9) + 
+            if(month_or_week == "Weekly"){
+                toplot1$time_label <- weeks_sorted[toplot1$time]
+            }else{
+                toplot1$time_label <- toplot1$time
+            }   
+            g <- ggplot(toplot1) + aes(x = time, ymin = lower, ymax = upper, group = plot.group, 
+                                text = paste0("Time Period: ", time_label, 
+                                          "<br>Sub-population: ", plot.group, 
+                                          "<br>Observed Deaths: ", deaths, 
+                                          "<br>Expected Deaths: ", round(mean), 
+                                          "<br>Expected Lower Bound: ", round(lower), 
+                                          "<br>Expected Upper Bound: ", round(upper)
+                                            )) + 
+                  geom_ribbon(fill = "#a6cee3", color = NA, alpha = 0.5) + 
+                  geom_line(aes(y = mean, color = "Expected Deaths")) + 
+                  geom_line(aes(y = deaths, color = 'Observed Deaths'), linewidth = 0.9) + 
                   ylab("Deaths") +  
                   theme_bw()+ 
                   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position="bottom") +
@@ -160,13 +173,24 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
               weeks_sorted <- weeks_all[order(toplot1$time_order[match(weeks_all, toplot1$time)])]
               toplot1$time <- match(toplot1$time,  weeks_sorted)
             }
+            if(month_or_week == "Weekly"){
+                toplot1$time_label <- weeks_sorted[toplot1$time]
+            }else{
+                toplot1$time_label <- toplot1$time
+            }   
             if(plot_show == "Excess Death Counts"){
-                g <- ggplot() + 
-                      geom_ribbon(data = toplot1, aes(x = time, ymin = lower, ymax = upper), 
-                                  fill = "#fdae61", color = "#fdae61", alpha = 0.5) + 
+                g <- ggplot(toplot1) + aes(
+                            x = time, ymin = lower, ymax = upper, y = excess, group = plot.group,
+                            text = paste0("Time Period: ", time_label, 
+                                          "<br>Sub-population: ", plot.group, 
+                                          "<br>Excess: ", round(excess), 
+                                          "<br>Lower Bound: ", round(lower), 
+                                          "<br>Upper Bound: ", round(upper)
+                                            )) + 
+                      geom_ribbon(fill = "#fdae61", color = "#fdae61", alpha = 0.5) + 
                       geom_hline(yintercept = 0, color = "#404040", linetype = 2) + 
-                      geom_point(data = toplot1, aes(x = time, y = excess), color = "#d7191c", alpha = 0.7) + 
-                      geom_line(data = toplot1, aes(x = time, y = excess), color = "#d7191c", linewidth = 0.9) + 
+                      geom_point(color = "#d7191c", alpha = 0.7) + 
+                      geom_line(color = "#d7191c", linewidth = 0.9) + 
                       ylab("Excess Deaths") +
                       theme_bw()+ 
                       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -183,7 +207,18 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
                 if(by == "By Sex and Age"){
                     toplot1$plot.group <- paste0(toplot1$plot.group.age, ", ",  toplot1$plot.group.sex)
                 }
-                g <- ggplot(toplot1) + aes(fill = plot.group, color = plot.group, x = time, ymin = lower, ymax = upper, y = excess) +
+                if(month_or_week == "Weekly"){
+                    toplot1$time_label <- weeks_sorted[toplot1$time]
+                }else{
+                    toplot1$time_label <- toplot1$time
+                }   
+                g <- ggplot(toplot1) + aes(fill = plot.group, color = plot.group, x = time, ymin = lower, ymax = upper, y = excess, group = plot.group, 
+                            text = paste0("Time Period: ", time_label, 
+                                          "<br>Sub-population: ", plot.group, 
+                                          "<br>Excess: ", round(excess), 
+                                          "<br>Lower Bound: ", round(lower), 
+                                          "<br>Upper Bound: ", round(upper)
+                                            )) +
                       geom_ribbon(color = NA, alpha = 0.2) +  
                       geom_hline(yintercept = 0, color = "#404040", linetype = 2) + 
                       geom_line(alpha = 0.9, linewidth = 0.9) + 

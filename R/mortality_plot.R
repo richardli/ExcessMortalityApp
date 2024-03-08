@@ -17,7 +17,10 @@
 #' 			  sexCol = "sex", ageCol = "age", 
 #' 			  popCol = "population", timeCol = "month")
 #' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",  
-#' 				month_or_week = "Monthly", plot_show = "Death Counts")
+#'              month_or_week = "Monthly", plot_show = "Death Counts")
+#' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month",  
+#'              month_or_week = "Monthly", 
+#'              plot_show = "Death Counts (Y-axis Starting From 0)")
 #' mortality_plot(model = out, sex = "All", age = "All", timeCol = "month", 
 #' 				month_or_week = "Monthly", plot_show = "Excess Death Counts")
 #' 
@@ -77,7 +80,7 @@ mortality_plot <- function(model, sex, age, month_or_week, plot_show, timeCol = 
 
        }
 
-       if(plot_show == "Death Counts"){
+       if(plot_show == "Death Counts" || plot_show == "Death Counts (Y-axis Starting From 0)" ){
         title <- paste0("Observed Deaths by ", ifelse(month_or_week == "Monthly", "Month", "Week"), 
                        " Compared to Expected Deaths")
          colors <- grDevices::colorRampPalette(c('#fd8d3c', '#b10026'))(length(unique(toplot2$year)))
@@ -94,11 +97,21 @@ mortality_plot <- function(model, sex, age, month_or_week, plot_show, timeCol = 
               weeks_sorted <- weeks_all[order(toplot1$time_order[match(weeks_all, toplot1$time)])]
               toplot1$time <- match(toplot1$time,  weeks_sorted)
             }
-            g <- ggplot(toplot1) + 
-                  geom_ribbon(aes(x = time, ymin = lower, ymax = upper), 
-                              fill = "#a6cee3", color = NA, alpha = 0.5) + 
-                  geom_line(aes(x = time, y = mean, color = "Expected Deaths")) + 
-                  geom_line(aes(x = time, y = deaths, color = 'Observed Deaths'), linewidth = 0.9) + 
+            if(month_or_week == "Weekly"){
+                toplot1$time_label <- weeks_sorted[toplot1$time]
+            }else{
+                toplot1$time_label <- toplot1$time
+            } 
+            g <- ggplot(toplot1)  + aes(x = time, ymin = lower, ymax = upper, group = NA, 
+                                text = paste0("Time Period: ", time_label, 
+                                          "<br>Observed Deaths: ", deaths, 
+                                          "<br>Expected Deaths: ", round(mean), 
+                                          "<br>Expected Lower Bound: ", round(lower), 
+                                          "<br>Expected Upper Bound: ", round(upper)
+                                            )) + 
+                  geom_ribbon(fill = "#a6cee3", color = NA, alpha = 0.5) + 
+                  geom_line(aes(y = mean, color = "Expected Deaths")) + 
+                  geom_line(aes(y = deaths, color = 'Observed Deaths'), linewidth = 0.9) + 
                   ylab("Deaths") +  
                   theme_bw()+ 
                   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position="bottom") +
@@ -112,6 +125,10 @@ mortality_plot <- function(model, sex, age, month_or_week, plot_show, timeCol = 
               g <- g + scale_x_continuous(breaks = breaks, labels = values)
             }else{
               g <- g + scale_x_date(breaks = "3 month", expand = c(0.01, 0.01), date_labels = "%Y-%m")
+            }
+
+            if(plot_show == "Death Counts (Y-axis Starting From 0)"){
+                g <- g + ylim(range(c(0, toplot1$upper, toplot1$mean, toplot1$deaths)))
             }
 
        }
@@ -132,12 +149,21 @@ mortality_plot <- function(model, sex, age, month_or_week, plot_show, timeCol = 
               weeks_sorted <- weeks_all[order(toplot2$time_order[match(weeks_all, toplot2$time)])]
               toplot2$time <- match(toplot2$time,  weeks_sorted)
             }
-            g <- ggplot() + 
-                  geom_ribbon(data = toplot2, aes(x = time, ymin = lower, ymax = upper), 
-                              fill = "#fdae61", color = "#fdae61", alpha = 0.5) + 
+            if(month_or_week == "Weekly"){
+                toplot2$time_label <- weeks_sorted[toplot2$time]
+            }else{
+                toplot2$time_label <- toplot2$time
+            } 
+            g <- ggplot(toplot2)  + aes(x = time, ymin = lower, ymax = upper, y = excess, group = NA,
+                                text = paste0("Time Period: ", time_label, 
+                                          "<br>Excess Deaths: ", round(excess), 
+                                          "<br>Lower Bound: ", round(lower), 
+                                          "<br>Upper Bound: ", round(upper)
+                                            )) + 
+                  geom_ribbon(fill = "#fdae61", color = "#fdae61", alpha = 0.5) + 
                   geom_hline(yintercept = 0, color = "#404040", linetype = 2) + 
-                  geom_point(data = toplot2, aes(x = time, y = excess), color = "#d7191c", alpha = 0.7) + 
-                  geom_line(data = toplot2, aes(x = time, y = excess), color = "#d7191c") + 
+                  geom_point(color = "#d7191c", alpha = 0.7) + 
+                  geom_line(color = "#d7191c") + 
                   ylab("Excess Deaths") +
                   theme_bw()+ 
                   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
