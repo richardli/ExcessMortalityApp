@@ -105,9 +105,9 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
              colors <- grDevices::colorRampPalette(c('#fd8d3c', '#b10026'))(length(unique(toplot1$year)))
 
             if(month_or_week == "Monthly"){
-              toplot1$time <- paste(toplot1$year, toplot1$month, sep = "-")
-              toplot1$time <- lubridate::ym(toplot1$time)
-              toplot1$time <- lubridate::ceiling_date(toplot1$time, "month") - lubridate::days(1)
+              toplot1$time <- paste(toplot1$year, toplot1$month, 1, sep = "-")
+              toplot1$time <- lubridate::ymd(toplot1$time)
+              # toplot1$time <- lubridate::ceiling_date(toplot1$time, "month") - lubridate::days(1)
             }else{
               # remove any week 53 that cannot be calculated
               toplot1$time <- paste(toplot1$year, toplot1$week, sep = "-W")
@@ -161,9 +161,9 @@ compare_plot <- function(model, by, month_or_week, plot_show, timeCol = "timeCol
        if(grepl("Excess", plot_show)){
             title <- paste0("Excess Deaths by ", ifelse(month_or_week == "Monthly", "Month", "Week"))
             if(month_or_week == "Monthly"){
-              toplot1$time <- paste(toplot1$year, toplot1$month, sep = "-")
-              toplot1$time <- lubridate::ym(toplot1$time)
-              toplot1$time = lubridate::ceiling_date(toplot1$time, "month") - lubridate::days(1)
+              toplot1$time <- paste(toplot1$year, toplot1$month, 1, sep = "-")
+              toplot1$time <- lubridate::ymd(toplot1$time)
+              # toplot1$time = lubridate::ceiling_date(toplot1$time, "month") - lubridate::days(1)
 			}else{
 			  # remove any week 53 that cannot be calculated
 			  toplot1 <- subset(toplot1, !is.na(excess))	

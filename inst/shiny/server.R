@@ -134,6 +134,10 @@ observeEvent(input$processMe, {
        if("death" %in% colnames(morData) && "deaths" %in% colnames(morData) == FALSE){
           colnames(morData)[colnames(morData) == "death"] <- "deaths"
        }
+       morData$deaths <- as.numeric(morData$deaths)
+       if(sum(is.na(morData$deaths)) > 0){
+         output$message_file_upload <- renderText("Error: 'deaths' column contains non-numerical values or NAs. Please check the input death counts.")
+       }
 
        time_case <- input$month_or_week
        if(time_case == "Monthly"){
@@ -183,6 +187,10 @@ observeEvent(input$processMe, {
         morData$popCol <- NA
        }else{
         colnames(morData)[which(colnames(morData) == tolower(input$raw_data_population))] <- "popCol"
+        morData$popCol <- as.numeric(morData$popCol)
+        if(sum(is.na(morData$popCol)) > 0){
+         output$message_file_upload <- renderText(paste0("Error: ", input$raw_data_population, " column contains non-numerical values or NAs. Please check the input population size."))
+        }
        }
        if(input$raw_data_sex == "None"){
         morData$sexCol <- "All"
