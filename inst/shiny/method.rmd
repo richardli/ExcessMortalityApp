@@ -29,49 +29,49 @@ The two models differ in the first step only. The detailed methods are described
 #### Simple baseline method
 
 The simple baseline method is based on the calculator described at [this link](https://preventepidemics.org/covid19/resources/excess-mortality/). The method does not make use of the population data $P_t$. It estimates the expected death count as the average death counts in the same month/week during pre-pandemic years. That is, 
-\[
+$$
 \tilde Y_t =  \frac{\sum_{i: J[i] = J[t], i \leq T_0}Y_t}{\sum_{i: J[i] = J[t], i \leq T_0} 1}
-\]
+$$
 Note that under this model, the expected death counts for the same week/month over different years remains the same, thus it does not account for any across-year variation or time trend. 
 
 The standard error of the expected death count $\tilde Y_t$ is estimated by the sample standard deviation of the death counts in the same month/week during pre-pandemic years, divided by the square root of the number of observations used to compute the sample average.
 
 Finally the 95% lower and upper confidence interval of the expected deaths are computed by the Wald type interval 
-\[
-(\tilde Y_t - 1.96\times SE(\tilde Y_t),\;\; \tilde Y_t + 1.96\times SE(\tilde Y_t))
-\] 
+$$
+(\tilde Y_t - 1.96\times SE(\tilde Y_t),  \tilde Y_t + 1.96\times SE(\tilde Y_t))
+$$ 
 
 The excess death counts are computed by 
-\[
+$$
   E_t = Y_t - \tilde Y_t
-\]
+$$
 and the 95% confidence interval is given by 
-\[
+$$
 (Y_t - \tilde Y_t - 1.96\times SE(\tilde Y_t), Y_t - \tilde Y_t + 1.96\times SE(\tilde Y_t))
-\] 
+$$ 
 
 #### Poisson regression method
 
 The Poisson regression model assumes the sampling distribution of the observed data to be
-\[
-\tilde Y_t \;|\; \mu_t  \sim Pois(\mu_t P_t)
-\]
+$$
+\tilde Y_t | \mu_t  \sim Pois(\mu_t P_t)
+$$
 where $\mu_t$ is a latent parameter for the time-varying mortality rate. When population size is unknown, $P_t$ is treated as a constant and omitted from the model. The mortality rate $\mu_t$ is further assumed to decompose into three components
-\[
+$$
 log(\mu_t) = \alpha + \beta t + \eta_t + \gamma_{J[t]}
-\] 
+$$ 
 where $\alpha$ is the global intercept; $\beta t$ captures the long-term linear trend in time; $\eta_t$ captures the long-term non-linear trend; and $\gamma_{J[t]}$ is the within-year seasonal effect. These latent parameters are given the following priors:
 
 + $\alpha$ and $\beta$ are fixed effects following a normal prior with a large variance.
 + The long-term non-linear effect $\eta_t$ follows an autoregressive process of order 1 (AR(1)) over a low-resolution knots. More specifically, we put $K$ evenly spaced knots over the entire time period, and we can write $\eta_t = \sum_{k = 1}^K w_{tk}x_k + e_t$, where $x_1, ..., x_K$ is an AR(1) process on the $K$ knots, i.e., 
-\[
+$$
 	x_k = \rho x_{k-1} + \epsilon_k
-\] 
+$$ 
 where $\epsilon_k \sim N(0, \sigma_{\eta}^2)$.
 The weights $w_{tk}$ for each time period $t$ is assigned such that when the time point is between two knots, the weight is inversely proportional to the distance from each knot. For formulation allows us to represent the observed non-linear change over time to be a slowly-varying function over a reduced set of time points. We put 4 evenly spaced knots per year by default. PC priors are used for the AR(1) process hyperparameters.
 + The seasonal effect $\gamma_{J[t]}$ is a random effect with first order random walk prior, i.e.
-\[
-\gamma_{j} = \gamma_{j-1} + \epsilon'_{j}\]
+$$
+\gamma_{j} = \gamma_{j-1} + \epsilon'_{j}$$
 where $\epsilon'_j \sim N(0, \sigma_{\gamma}^2)$. PC prior is used for $\sigma_{\gamma}^2$.
 
 The model is estimated by the INLA software. Posterior median and 95\% posterior credible intervals of $\tilde Y_t$ and $Y_t - \tilde Y_t$ are obtained from the fitted model directly, and used as the final estimates and uncertainty intervals. 
