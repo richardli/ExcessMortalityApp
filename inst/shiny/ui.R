@@ -14,10 +14,12 @@ ui <- fluidPage(
    tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
   ),
-  titlePanel("Excess Mortality Calculator"),
-  p("Developed by the openVA team", a(href="https://openva.net", "(https://openVA.net)."), "This work is supported by Vital Strategies as part of the Bloomberg Philanthropies Data for Health Initiative.",
-    # HTML("&emsp;"),
-    tags$a(img(src="vital_strategies.JPG", style="width:200px; position: relative; top: -5px;"), href="https://www.vitalstrategies.org/")),
+  titlePanel(
+      title = div("Excess Mortality Calculator", 
+      tags$a(img(src="vital_strategies.JPG", style="width:200px; position: relative; top: -1px;"), href="https://www.vitalstrategies.org/")),
+      windowTitle =  "Excess Mortality Calculator"
+    ),
+  p("Developed by the openVA team", a(href="https://openva.net", "(https://openVA.net)."), "This work is supported by Vital Strategies as part of the Bloomberg Philanthropies Data for Health Initiative."),
   hr(),
   shinyjs::useShinyjs(),
 
