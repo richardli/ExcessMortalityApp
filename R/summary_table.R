@@ -45,7 +45,7 @@ summary_table <- function(time_case, T, years, morData){
        tab1.rate <- cbind(rownames(tab.rate), tab.rate)
        colnames(tab1.rate)[1] <- ifelse(time_case == "Monthly", "Month", "Week")
        cleanTab[['Death Counts']][["All"]][["All"]] <- tab1
-       cleanTab[['Death Rate (number of deaths per 100,000 population)']][["All"]][["All"]] <- tab1.rate
+       cleanTab[['Death Rate (Number of Deaths Per 100,000 Population)']][["All"]][["All"]] <- tab1.rate
 
 
        # by Sex
@@ -62,7 +62,7 @@ summary_table <- function(time_case, T, years, morData){
          tab.sex.rate <- cbind(rownames(tab.sex.rate), tab.sex.rate)
          colnames(tab.sex.rate)[1] <- ifelse(time_case == "Monthly", "Month", "Week")
          cleanTab[['Death Counts']][[s]][["All"]] <- tab.sex
-         cleanTab[['Death Rate (number of deaths per 100,000 population)']][[s]][["All"]] <- tab.sex.rate
+         cleanTab[['Death Rate (Number of Deaths Per 100,000 Population)']][[s]][["All"]] <- tab.sex.rate
        }
 
        # by Age
@@ -79,7 +79,7 @@ summary_table <- function(time_case, T, years, morData){
          tab.age.rate <- cbind(rownames(tab.age.rate), tab.age.rate)
          colnames(tab.age.rate)[1] <- ifelse(time_case == "Monthly", "Month", "Week")
          cleanTab[['Death Counts']][["All"]][[a]] <- tab.age
-         cleanTab[['Death Rate (number of deaths per 100,000 population)']][["All"]][[a]] <- tab.age.rate
+         cleanTab[['Death Rate (Number of Deaths Per 100,000 Population)']][["All"]][[a]] <- tab.age.rate
        }
 
         # by Sex and Age
@@ -97,7 +97,7 @@ summary_table <- function(time_case, T, years, morData){
            tab.sexage.rate <- cbind(rownames(tab.sexage.rate), tab.sexage.rate)
            colnames(tab.sexage.rate)[1] <- ifelse(time_case == "Monthly", "Month", "Week")
            cleanTab[['Death Counts']][[s]][[a]] <- tab.sexage
-           cleanTab[['Death Rate (number of deaths per 100,000 population)']][[s]][[a]] <- tab.sexage.rate
+           cleanTab[['Death Rate (Number of Deaths Per 100,000 Population)']][[s]][[a]] <- tab.sexage.rate
           }
         }
 

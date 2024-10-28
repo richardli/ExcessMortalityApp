@@ -159,7 +159,7 @@ ui <- fluidPage(
               tabPanel(title = "Historical Data Explorer",
                           fluidRow(
                             column(3,
-                              selectInput("table_show_type", h4("Historical Data"), choices=c("Death Counts", "Death Rate Number of Deaths Per 100,000 Population)"), width="400px")
+                              selectInput("table_show_type", h4("Historical Data"), choices=c("Death Counts", "Death Rate (Number of Deaths Per 100,000 Population)"), width="400px")
                             ), 
                             column(3,
                                 selectInput("table_show_sex", h4("Sex"), choices=c(), width="400px"), 

@@ -29,6 +29,7 @@ function(input, output, session) {
     filename = function(){"SampleInput.csv"},
     content = function(file){
       data(SampleInput1)
+      options(scipen = 100)
       write.csv(SampleInput1, file, row.names = FALSE)    
     } 
   )
@@ -40,6 +41,7 @@ function(input, output, session) {
       out2 <- aggregate(population ~ year + month + age, data = SampleInput2, FUN = sum)
       out <- merge(out1, out2)
       out <- out[with(out, order(year, month, age)), ]
+      options(scipen = 100)
       write.csv(out, file, row.names = FALSE)    
     } 
   )
@@ -51,6 +53,7 @@ function(input, output, session) {
       out2 <- aggregate(population ~ year + month + sex, data = SampleInput2, FUN = sum)
       out <- merge(out1, out2)
       out <- out[with(out, order(year, month, sex)), ]
+      options(scipen = 100)
       write.csv(out, file, row.names = FALSE)    
     } 
   )
@@ -58,6 +61,7 @@ function(input, output, session) {
     filename = function(){"SampleInput_by_age_sex.csv"},
     content = function(file){
       data(SampleInput2)
+      options(scipen = 100)
       write.csv(SampleInput2, file, row.names = FALSE)    
     } 
   )  
@@ -69,6 +73,7 @@ function(input, output, session) {
       out2 <- aggregate(population ~ year + week, data = SampleInput3, FUN = sum)
       out <- merge(out1, out2)
       out <- out[with(out, order(year, week)), ]
+      options(scipen = 100)
       write.csv(out, file, row.names = FALSE)    
     } 
   )  
@@ -80,6 +85,7 @@ function(input, output, session) {
       out2 <- aggregate(population ~ year + week + sex, data = SampleInput3, FUN = sum)
       out <- merge(out1, out2)
       out <- out[with(out, order(year, week, sex)), ]
+      options(scipen = 100)
       write.csv(out, file, row.names = FALSE) 
     } 
   )  
@@ -91,6 +97,7 @@ function(input, output, session) {
       out2 <- aggregate(population ~ year + week + age, data = SampleInput3, FUN = sum)
       out <- merge(out1, out2)
       out <- out[with(out, order(year, week, age)), ]
+      options(scipen = 100)
       write.csv(out, file, row.names = FALSE) 
     } 
   )  
@@ -98,6 +105,7 @@ function(input, output, session) {
     filename = function(){"SampleInput_by_age_sex_weekly.csv"},
     content = function(file){
       data(SampleInput3)
+      options(scipen = 100)
       write.csv(SampleInput3, file, row.names = FALSE)    
     } 
   )  
@@ -232,6 +240,7 @@ observeEvent(input$processMe, {
        ## ---------------------------------------------------------------------------------- ##
 
        rv[['cleanTab']] <- summary_table(time_case, T, years, morData)
+       print(rv[['cleanTab']])
        if(input$which_model == "Simple Baseline"){
          rv[['excess']] <- base_model(time_case, T, years, morData, "sexCol", "ageCol", "popCol", "timeCol", use.rate = FALSE)        
        }else{
