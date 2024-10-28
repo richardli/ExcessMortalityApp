@@ -53,6 +53,9 @@ When errors occur, the most likely reason is because the input data are ill-form
 
 # Version history
 
+## version 0.2.1
+Minor bug fix and usability improvements.
+
 ## version 0.2.0
 This version added a new smoothing model and several visualizations. 
 
