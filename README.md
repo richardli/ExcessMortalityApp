@@ -70,3 +70,14 @@ The work is supported by Vital Strategies.
 The deployment of this App to shinyapps.io uses the INLA repository at [https://github.com/inbo/INLA](https://github.com/inbo/INLA) to get around the issue of INLA not being on github or CRAN. Thanks INBO!
 
 
+# Deployment notes
+
+```
+# Deployment to shinyapps.io using R 4.1 
+install_github("inbo/INLA")
+install_github("richardli/ExcessMortalityApp")
+setwd("inst/shiny/")
+deployApp()
+```
+
+

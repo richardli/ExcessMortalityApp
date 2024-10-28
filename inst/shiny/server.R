@@ -240,7 +240,6 @@ observeEvent(input$processMe, {
        ## ---------------------------------------------------------------------------------- ##
 
        rv[['cleanTab']] <- summary_table(time_case, T, years, morData)
-       print(rv[['cleanTab']])
        if(input$which_model == "Simple Baseline"){
          rv[['excess']] <- base_model(time_case, T, years, morData, "sexCol", "ageCol", "popCol", "timeCol", use.rate = FALSE)        
        }else{
